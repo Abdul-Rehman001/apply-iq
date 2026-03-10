@@ -1,26 +1,179 @@
 @import "tailwindcss";
 
+/* ──────────────────────────────────────────────
+   Tailwind v4 custom theme tokens
+   We define static values here so Tailwind can
+   generate utility classes. Runtime theme-swap
+   is handled by CSS custom properties below.
+────────────────────────────────────────────── */
+@theme {
+  --font-sans: var(--font-manrope), system-ui, sans-serif;
+
+  /* These reference the runtime CSS custom properties
+     so bg-bg-base / text-text-primary etc all work */
+  --color-primary: var(--tw-primary);
+  --color-primary-hover: var(--tw-primary-hover);
+  --color-primary-foreground: var(--tw-primary-fg);
+
+  --color-bg-base: var(--tw-bg-base);
+  --color-bg-surface: var(--tw-bg-surface);
+  --color-bg-surface-elevated: var(--tw-bg-elevated);
+  --color-bg-surface-hover: var(--tw-bg-hover);
+  --color-bg-subtle: var(--tw-bg-subtle);
+  --color-sidebar: var(--tw-sidebar);
+  --color-sidebar-hover: var(--tw-sidebar-hover);
+
+  --color-text-primary: var(--tw-text-primary);
+  --color-text-secondary: var(--tw-text-secondary);
+  --color-text-tertiary: var(--tw-text-tertiary);
+
+  --color-border-subtle: var(--tw-border-subtle);
+  --color-border-default: var(--tw-border-default);
+  --color-border-strong: var(--tw-border-strong);
+
+  --color-status-saved-bg: var(--tw-st-saved-bg);
+  --color-status-saved-text: var(--tw-st-saved-text);
+  --color-status-saved-border: var(--tw-st-saved-border);
+  --color-status-applied-bg: var(--tw-st-applied-bg);
+  --color-status-applied-text: var(--tw-st-applied-text);
+  --color-status-applied-border: var(--tw-st-applied-border);
+  --color-status-interview-bg: var(--tw-st-interview-bg);
+  --color-status-interview-text: var(--tw-st-interview-text);
+  --color-status-interview-border: var(--tw-st-interview-border);
+  --color-status-offer-bg: var(--tw-st-offer-bg);
+  --color-status-offer-text: var(--tw-st-offer-text);
+  --color-status-offer-border: var(--tw-st-offer-border);
+  --color-status-rejected-bg: var(--tw-st-rejected-bg);
+  --color-status-rejected-text: var(--tw-st-rejected-text);
+  --color-status-rejected-border: var(--tw-st-rejected-border);
+}
+
+/* ──────────────────────────────────────────────
+   LIGHT MODE  (default / :root)
+   next-themes removes .dark from <html> for light
+────────────────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+  --tw-primary: #7c5ce0;
+  --tw-primary-hover: #6a48d0;
+  --tw-primary-fg: #ffffff;
+
+  --tw-bg-base: #f5f3f9;
+  --tw-bg-surface: #ffffff;
+  --tw-bg-elevated: #f0edf6;
+  --tw-bg-hover: #e8e4f2;
+  --tw-bg-subtle: #faf9fc;
+  --tw-sidebar: #ffffff;
+  --tw-sidebar-hover: #f0edf6;
+
+  --tw-text-primary: #1a1625;
+  --tw-text-secondary: #6e6883;
+  --tw-text-tertiary: #9e98ae;
+
+  --tw-border-subtle: #e8e4f0;
+  --tw-border-default: #d4d0e0;
+  --tw-border-strong: #b8b2ca;
+
+  --tw-st-saved-bg: #eef1ff;
+  --tw-st-saved-text: #4a63c8;
+  --tw-st-saved-border: #c8d0f0;
+  --tw-st-applied-bg: #fff4eb;
+  --tw-st-applied-text: #c06820;
+  --tw-st-applied-border: #f0d0a8;
+  --tw-st-interview-bg: #e8faf0;
+  --tw-st-interview-text: #1a8050;
+  --tw-st-interview-border: #a8e0c0;
+  --tw-st-offer-bg: #f0e8ff;
+  --tw-st-offer-text: #7c5ce0;
+  --tw-st-offer-border: #c8b8f0;
+  --tw-st-rejected-bg: #fff0f0;
+  --tw-st-rejected-text: #d04040;
+  --tw-st-rejected-border: #f0b8b8;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ──────────────────────────────────────────────
+   DARK MODE  (.dark class on <html>)
+   next-themes adds class="dark" for dark theme
+────────────────────────────────────────────── */
+.dark {
+  color-scheme: dark;
+  --tw-primary: #a689fa;
+  --tw-primary-hover: #bda6ff;
+  --tw-primary-fg: #0b0914;
+
+  --tw-bg-base: #0b0914;
+  --tw-bg-surface: #13101d;
+  --tw-bg-elevated: #161324;
+  --tw-bg-hover: #221c38;
+  --tw-bg-subtle: #0f0c1a;
+  --tw-sidebar: #0e0b1a;
+  --tw-sidebar-hover: #1a1530;
+
+  --tw-text-primary: #f8f7fa;
+  --tw-text-secondary: #9f9baa;
+  --tw-text-tertiary: #6B6085;
+
+  --tw-border-subtle: #1e1a2e;
+  --tw-border-default: #2a2540;
+  --tw-border-strong: #3a3258;
+
+  --tw-st-saved-bg: #1a1f3d;
+  --tw-st-saved-text: #7895f7;
+  --tw-st-saved-border: #2a3060;
+  --tw-st-applied-bg: #2d1a0e;
+  --tw-st-applied-text: #fb923c;
+  --tw-st-applied-border: #4a2810;
+  --tw-st-interview-bg: #0d2a18;
+  --tw-st-interview-text: #4ade80;
+  --tw-st-interview-border: #154d2a;
+  --tw-st-offer-bg: #1e1030;
+  --tw-st-offer-text: #a689fa;
+  --tw-st-offer-border: #3b1d58;
+  --tw-st-rejected-bg: #2a0e16;
+  --tw-st-rejected-text: #f87171;
+  --tw-st-rejected-border: #4a1525;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* ──────────────────────────────────────────────
+   Base styles
+────────────────────────────────────────────── */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--tw-bg-base);
+  color: var(--tw-text-primary);
+  font-family: var(--font-sans);
+  scrollbar-width: thin;
+  scrollbar-color: var(--tw-border-subtle) transparent;
+}
+
+*,
+*::before,
+*::after {
+  border-color: var(--tw-border-subtle);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--tw-border-subtle);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--tw-border-default);
+}
+
+@utility scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }

@@ -1,0 +1,179 @@
+﻿"use client";
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useTheme } from "next-themes";
+import { cn } from "@/lib/utils";
+import { 
+  LayoutDashboard, Briefcase, BarChart2, Settings, LogOut, Zap, 
+  ChevronsLeft, ChevronsRight, X, Sun, Moon
+} from "lucide-react";
+import { signOut } from "next-auth/react";
+
+const navigation = [
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "My Jobs", href: "/jobs", icon: Briefcase },
+  { name: "Analytics", href: "/analytics", icon: BarChart2 },
+  { name: "Settings", href: "/settings", icon: Settings },
+];
+
+interface SidebarProps {
+  user?: {
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+  };
+  collapsed: boolean;
+  onToggle: () => void;
+  mobileOpen: boolean;
+  onMobileClose: () => void;
+}
+
+export function Sidebar({ user, collapsed, onToggle, mobileOpen, onMobileClose }: SidebarProps) {
+  const pathname = usePathname();
+  const { resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const isDark = resolvedTheme === "dark";
+
+  const sidebarContent = (
+    <div className="flex flex-col h-full">
+      {/* Logo */}
+      <div className={cn("flex items-center gap-3 mb-8", collapsed ? "px-4 justify-center" : "px-6")}>
+        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-purple-800 flex items-center justify-center shadow-[0_0_15px_rgba(166,137,250,0.4)] shrink-0">
+          <Zap className="h-4 w-4 text-text-primary" strokeWidth={3} />
+        </div>
+        {!collapsed && (
+          <span className="text-lg font-extrabold tracking-tight text-text-primary whitespace-nowrap">
+            ApplyIQ
+          </span>
+        )}
+      </div>
+
+      {/* Navigation */}
+      <nav className={cn("flex-1 space-y-1", collapsed ? "px-2" : "px-3")}>
+        {navigation.map((item) => {
+          const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
+          return (
+            <Link
+              key={item.name}
+              href={item.href}
+              onClick={onMobileClose}
+              title={collapsed ? item.name : undefined}
+              className={cn(
+                "group flex items-center gap-3 rounded-xl text-sm font-semibold transition-all duration-200",
+                collapsed ? "px-3 py-3 justify-center" : "px-3 py-2.5",
+                isActive
+                  ? "text-primary bg-primary/10 border border-primary/20 shadow-[0_0_12px_rgba(166,137,250,0.1)]"
+                  : "text-text-secondary border border-transparent hover:text-text-primary hover:bg-sidebar-hover"
+              )}
+            >
+              <item.icon className={cn(
+                "h-[18px] w-[18px] shrink-0 transition-colors duration-200",
+                isActive ? "text-primary" : "text-text-tertiary group-hover:text-text-secondary"
+              )} />
+              {!collapsed && <span>{item.name}</span>}
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Theme Toggle */}
+      <div className={cn("mb-3", collapsed ? "px-2 flex justify-center" : "px-3")}>
+        <button
+          onClick={() => setTheme(isDark ? "light" : "dark")}
+          title={collapsed ? (isDark ? "Switch to Light" : "Switch to Dark") : undefined}
+          className={cn(
+            "flex items-center gap-3 rounded-xl text-sm font-semibold transition-all duration-200 text-text-secondary hover:text-text-primary hover:bg-sidebar-hover",
+            collapsed ? "px-3 py-3 justify-center" : "px-3 py-2.5 w-full"
+          )}
+        >
+          {/* Render neutral icon on server; correct icon after mount */}
+          {!mounted ? (
+            <span className="h-[18px] w-[18px] shrink-0" />
+          ) : isDark ? (
+            <Sun className="h-[18px] w-[18px] shrink-0" />
+          ) : (
+            <Moon className="h-[18px] w-[18px] shrink-0" />
+          )}
+          {!collapsed && mounted && (
+            <span>{isDark ? "Light Mode" : "Dark Mode"}</span>
+          )}
+          {!collapsed && !mounted && <span>Theme</span>}
+        </button>
+      </div>
+
+      {/* Footer / User */}
+      <div className={cn(collapsed ? "px-2" : "px-3")}>
+        {collapsed ? (
+          <div className="flex flex-col items-center gap-3">
+            {user?.image ? (
+              <img src={user.image} alt={user.name || "User"} className="h-9 w-9 rounded-full object-cover border border-border-default" />
+            ) : (
+              <div className="h-9 w-9 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
+                <span className="text-sm font-bold text-primary">{user?.name?.charAt(0) || "U"}</span>
+              </div>
+            )}
+            <button onClick={() => signOut({ callbackUrl: "/login" })} className="p-2 rounded-lg text-text-tertiary hover:bg-red-500/10 hover:text-red-400 transition-all" title="Sign Out">
+              <LogOut className="h-4 w-4" />
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between p-3 rounded-xl bg-bg-surface-elevated border border-border-subtle">
+            <div className="flex items-center gap-3 overflow-hidden">
+              {user?.image ? (
+                <img src={user.image} alt={user.name || "User"} className="h-9 w-9 rounded-full object-cover shrink-0 border border-border-default" />
+              ) : (
+                <div className="h-9 w-9 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30 shrink-0">
+                  <span className="text-sm font-bold text-primary">{user?.name?.charAt(0) || "U"}</span>
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-text-primary truncate">{user?.name || "User"}</p>
+                <p className="text-[11px] text-text-tertiary truncate">{user?.email}</p>
+              </div>
+            </div>
+            <button onClick={() => signOut({ callbackUrl: "/login" })} className="p-1.5 rounded-lg text-text-tertiary hover:bg-red-500/10 hover:text-red-400 transition-all shrink-0" title="Sign Out">
+              <LogOut className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Collapse Toggle (desktop) */}
+      <div className={cn("hidden lg:flex mt-4", collapsed ? "justify-center px-2" : "px-3")}>
+        <button onClick={onToggle} className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-text-tertiary hover:text-text-primary hover:bg-sidebar-hover transition-colors text-xs font-medium">
+          {collapsed ? <ChevronsRight className="h-4 w-4" /> : <><ChevronsLeft className="h-4 w-4" /> <span>Collapse</span></>}
+        </button>
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+      {mobileOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden" onClick={onMobileClose} />
+      )}
+
+      {/* Mobile Sidebar */}
+      <aside className={cn(
+        "fixed top-0 left-0 h-screen w-64 bg-sidebar border-r border-border-subtle flex flex-col py-6 z-50 transition-transform duration-300 lg:hidden",
+        mobileOpen ? "translate-x-0" : "-translate-x-full"
+      )}>
+        <button onClick={onMobileClose} className="absolute top-4 right-4 p-1.5 rounded-lg text-text-tertiary hover:text-text-primary hover:bg-sidebar-hover transition-colors">
+          <X className="h-5 w-5" />
+        </button>
+        {sidebarContent}
+      </aside>
+
+      {/* Desktop Sidebar */}
+      <aside className={cn(
+        "hidden lg:flex fixed top-0 left-0 h-screen bg-sidebar border-r border-border-subtle flex-col py-6 z-50 transition-all duration-300",
+        collapsed ? "w-[72px]" : "w-64"
+      )}>
+        {sidebarContent}
+      </aside>
+    </>
+  );
+}
