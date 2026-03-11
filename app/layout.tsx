@@ -9,6 +9,7 @@ const manrope = Manrope({
 });
 
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = {
   title: "ApplyIQ - AI Job Tracker",
@@ -29,6 +30,13 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
+            <Toaster
+              position="top-center"
+              toastOptions={{
+                className: "!bg-bg-surface !text-text-primary !border !border-border-subtle !shadow-lg !rounded-xl !text-sm !font-medium",
+                duration: 3000,
+              }}
+            />
             {children}
         </ThemeProvider>
       </body>

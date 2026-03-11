@@ -4,12 +4,18 @@ import { redirect } from "next/navigation";
 import dbConnect from "@/lib/mongodb";
 import { Job } from "@/models/Job";
 import { Board } from "@/components/board/Board";
+import { JobList } from "@/components/jobs/JobList";
 import { Plus } from "lucide-react";
 
-async function getJobs(userId: string) {
+import { User } from "@/models/User";
+
+async function getJobsAndUser(userId: string) {
   await dbConnect();
-  const jobs = await Job.find({ userId }).sort({ createdAt: -1 });
-  return JSON.parse(JSON.stringify(jobs));
+  const [jobs, user] = await Promise.all([
+     Job.find({ userId }).sort({ createdAt: -1 }),
+     User.findById(userId).select("resumeText").lean()
+  ]);
+  return { jobs: JSON.parse(JSON.stringify(jobs)), userResumeText: (user as any)?.resumeText || "" };
 }
 
 export default async function JobsPage() {
@@ -19,7 +25,7 @@ export default async function JobsPage() {
   }
 
   // @ts-ignore
-  const jobs = await getJobs(session.user.id);
+  const { jobs, userResumeText } = await getJobsAndUser(session.user.id);
 
   return (
     <div className="h-full flex flex-col space-y-8">
@@ -28,7 +34,7 @@ export default async function JobsPage() {
            <h1 className="text-2xl font-extrabold text-text-primary tracking-tight">My Applications</h1>
            <p className="text-sm text-text-secondary mt-1">Manage and track your job search pipeline.</p>
         </div>
-        <AddJobModal>
+        <AddJobModal userResumeText={userResumeText}>
              <button className="flex items-center gap-2 h-10 px-6 bg-primary hover:bg-primary-hover text-primary-foreground font-bold text-sm rounded-xl transition-all shadow-md shadow-primary/20">
               <Plus className="h-4 w-4" strokeWidth={2.5} />
               Add Application
@@ -37,6 +43,7 @@ export default async function JobsPage() {
       </div>
 
       <Board initialJobs={jobs} />
+      <JobList initialJobs={jobs} />
     </div>
   );
 }

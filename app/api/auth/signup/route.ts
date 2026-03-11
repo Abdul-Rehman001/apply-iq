@@ -38,6 +38,7 @@ export async function POST(req: Request) {
       email,
       passwordHash,
       provider: "credentials",
+      completedOnboarding: false, // new users must complete onboarding
     });
 
     return NextResponse.json(

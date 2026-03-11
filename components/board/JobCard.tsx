@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { Draggable } from "@hello-pangea/dnd";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { Paperclip } from "lucide-react";
+import { format, differenceInDays } from "date-fns";
+import { Paperclip, Calendar } from "lucide-react";
 
 interface JobCardProps {
   job: any;
@@ -60,6 +60,13 @@ export function JobCard({ job, index, columnId }: JobCardProps) {
             )}>
               {/* Status indicator top border */}
               <div className={cn("absolute top-0 left-0 right-0 h-1 bg-gradient-to-r opacity-50", getLineGradient(columnId))}></div>
+              {/* Stale indicator dot — shows if no update in 14+ days */}
+              {differenceInDays(new Date(), new Date(job.updatedAt)) >= 14 && (
+                <div
+                  className="absolute top-2.5 left-2.5 w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.7)]"
+                  title="No updates in 14 days"
+                />
+              )}
               
               <div className="flex justify-between items-start mb-3">
                   <div>
@@ -88,6 +95,16 @@ export function JobCard({ job, index, columnId }: JobCardProps) {
                   </div>
                   <div className="flex items-center gap-2">
                       {job.coverLetter && <Paperclip className="w-3.5 h-3.5 text-text-tertiary" />}
+                      {job.followUpDate && (
+                        <span className={cn(
+                          "flex items-center gap-1 text-[10px] font-medium",
+                          differenceInDays(new Date(), new Date(job.followUpDate)) >= 0
+                            ? "text-amber-500" : "text-text-tertiary"
+                        )}>
+                          <Calendar className="w-3 h-3" />
+                          {format(new Date(job.followUpDate), "MMM d")}
+                        </span>
+                      )}
                       <span className="text-[10px] font-medium text-text-tertiary">
                         {columnId === 'saved' ? 'Saved' : columnId === 'applied' ? 'Applied' : 'Updated'} {format(new Date(job.updatedAt || new Date()), "MMM d")}
                       </span>

@@ -7,15 +7,20 @@ import { toast } from "react-hot-toast";
 import { 
   Bot, Sparkles, Building2, MapPin, DollarSign, ArrowLeft, 
   CheckCircle2, AlertTriangle, ShieldAlert, Target, Zap, 
-  FileText, Copy, RefreshCw, ExternalLink, ChevronDown, ChevronUp
+  FileText, Copy, RefreshCw, ExternalLink, ChevronDown, ChevronUp, Calendar
 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { formatDistanceToNow, isPast } from "date-fns";
 
 interface JobDetailProps {
   job: any;
+  hasResume?: boolean;
 }
 
-export function JobDetailClient({ job }: JobDetailProps) {
+export function JobDetailClient({ job, hasResume }: JobDetailProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialTab = (searchParams.get("tab") as any) || "overview";
   const [analyzing, setAnalyzing] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [description, setDescription] = useState(job.jobDescription || "");
@@ -23,10 +28,31 @@ export function JobDetailClient({ job }: JobDetailProps) {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(job.matchScore === undefined);
   
   // Tab states
-  const [activeTab, setActiveTab] = useState<"overview" | "notes" | "contacts" | "activity">("overview");
-  const [activeAITab, setActiveAITab] = useState<"coach" | "cover-letter">("coach");
+  const [activeTab, setActiveTab] = useState<"overview" | "notes" | "contacts" | "activity">(initialTab === "notes" ? "notes" : "overview");
+  const [activeAITab, setActiveAITab] = useState<"coach" | "cover-letter">(initialTab === "interview-prep" ? "coach" : "coach");
   const [coverLetter, setCoverLetter] = useState(job.coverLetter || "");
   const [generatingLetter, setGeneratingLetter] = useState(false);
+  
+  const [notes, setNotes] = useState(job.notes || "");
+  const [savingNotes, setSavingNotes] = useState(false);
+
+  const handleSaveNotes = async () => {
+    setSavingNotes(true);
+    try {
+      const res = await fetch(`/api/jobs/${job._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notes }),
+      });
+      if (!res.ok) throw new Error("Update failed");
+      toast.success("Notes saved!");
+      router.refresh();
+    } catch (error) {
+      toast.error("Failed to save notes");
+    } finally {
+      setSavingNotes(false);
+    }
+  };
 
   const handleSaveDescription = async () => {
     setSaving(true);
@@ -95,13 +121,7 @@ export function JobDetailClient({ job }: JobDetailProps) {
   };
 
   return (
-    <div className="max-w-7xl mx-auto pb-20">
-      
-      {/* Top Navigation */}
-      <Link href="/jobs" className="inline-flex items-center gap-2 text-xs font-bold text-text-secondary hover:text-text-primary transition-colors mb-6">
-          <ArrowLeft className="w-4 h-4" />
-          Back to Job List
-      </Link>
+    <div className="w-full pb-20">
       
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-10">
@@ -134,9 +154,9 @@ export function JobDetailClient({ job }: JobDetailProps) {
           </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-         {/* Left Column: Details */}
-         <div className="lg:col-span-2 space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+         {/* Job Details Column */}
+         <div className="lg:col-span-5 space-y-8 order-2 lg:order-2">
             
             {/* Status & Priority */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -158,6 +178,39 @@ export function JobDetailClient({ job }: JobDetailProps) {
 
             {activeTab === "overview" && (
                <div className="space-y-6">
+                  {/* Action Bar (Follow up date picker) */}
+                  <div className="flex items-center gap-4 bg-bg-surface border border-border-subtle p-4 rounded-xl">
+                      <div className="flex-1">
+                          <label className="text-xs font-bold text-text-secondary block mb-1">Follow-up / Interview Date</label>
+                          <input 
+                              type="date" 
+                              className="bg-bg-base border border-border-default rounded-lg px-3 py-1.5 text-sm text-text-primary focus:outline-none focus:border-primary"
+                              defaultValue={job.followUpDate ? new Date(job.followUpDate).toISOString().split('T')[0] : ''}
+                              onChange={async (e) => {
+                                  try {
+                                      await fetch(`/api/jobs/${job._id}`, {
+                                          method: 'PUT',
+                                          headers: { 'Content-Type': 'application/json' },
+                                          body: JSON.stringify({ followUpDate: e.target.value || null })
+                                      });
+                                      toast.success("Date updated");
+                                      router.refresh();
+                                  } catch {
+                                      toast.error("Failed to update date");
+                                  }
+                              }}
+                          />
+                      </div>
+                      {job.followUpDate && (
+                          <div className="text-right">
+                             <p className={`text-xs font-bold ${isPast(new Date(job.followUpDate)) ? 'text-amber-500' : 'text-emerald-500'}`}>
+                                 {isPast(new Date(job.followUpDate)) ? 'Overdue!' : 'Upcoming'}
+                             </p>
+                             <p className="text-[10px] text-text-tertiary">{formatDistanceToNow(new Date(job.followUpDate))} {isPast(new Date(job.followUpDate)) ? 'ago' : 'away'}</p>
+                          </div>
+                      )}
+                  </div>
+
                   <div className="flex items-center justify-between">
                      <h2 className="text-xl font-extrabold text-text-primary tracking-tight">Job Description</h2>
                      {!isEditing ? (
@@ -212,14 +265,31 @@ export function JobDetailClient({ job }: JobDetailProps) {
             )}
 
             {activeTab === "notes" && (
-               <div className="bg-bg-surface border border-border-subtle rounded-2xl p-6 text-center text-text-tertiary h-[200px] flex items-center justify-center text-sm font-medium">
-                  Notes & Contacts feature currently under development
+               <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                   <div className="bg-bg-surface border border-border-subtle rounded-2xl p-6">
+                       <h2 className="text-lg font-extrabold text-text-primary mb-4">Notes & Links</h2>
+                       <textarea
+                           className="w-full bg-bg-surface-elevated border border-border-default rounded-xl px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 min-h-[200px] resize-none"
+                           placeholder="Add interview notes, important links, or recruiter contacts..."
+                           value={notes}
+                           onChange={(e) => setNotes(e.target.value)}
+                       />
+                       <div className="flex justify-end mt-4">
+                           <button 
+                               onClick={handleSaveNotes}
+                               disabled={savingNotes}
+                               className="px-6 py-2 bg-primary hover:bg-primary-hover text-bg-base font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(166,137,250,0.3)] disabled:opacity-50"
+                           >
+                              {savingNotes ? "Saving..." : "Save Notes"}
+                           </button>
+                       </div>
+                   </div>
                </div>
             )}
          </div>
 
-         {/* Right Column: AI Coach Analysis */}
-         <div className="space-y-6">
+         {/* AI Coach Analysis Column */}
+         <div className="lg:col-span-7 space-y-6 order-1 lg:order-1">
             <div className="bg-bg-surface border border-border-subtle rounded-2xl p-6 relative overflow-hidden group shadow-lg">
                <div className="flex items-center gap-3 mb-6">
                   <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center border border-primary/30 text-primary">
@@ -262,7 +332,16 @@ export function JobDetailClient({ job }: JobDetailProps) {
                {/* Content based on AI Tab */}
                {activeAITab === "coach" && (
                  <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                     {job.whatsStrong ? (
+                     {!hasResume ? (
+                        <div className="text-center py-6 bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 shadow-sm border-dashed">
+                           <AlertTriangle className="w-6 h-6 text-amber-500 mx-auto mb-2" />
+                           <p className="text-sm font-bold text-amber-500 mb-1">Resume Missing</p>
+                           <p className="text-xs text-text-secondary mb-4 leading-relaxed">You need to upload a resume to generate personalized AI coaching, tailored cover letters, and match scores.</p>
+                           <Link href="/settings" className="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-extrabold tracking-wide uppercase rounded-xl transition-all shadow-md shadow-amber-500/20 inline-block">
+                               Upload Resume in Settings
+                           </Link>
+                        </div>
+                     ) : job.whatsStrong ? (
                         <>
                            <div>
                               <div className="flex items-center gap-1.5 text-emerald-400 text-xs font-bold mb-2">
@@ -291,12 +370,18 @@ export function JobDetailClient({ job }: JobDetailProps) {
                               </div>
                            )}
                            
-                           <button 
-                              className="w-full py-3 mt-2 bg-primary hover:bg-primary-hover text-bg-base font-extrabold text-xs tracking-wider uppercase rounded-xl transition-all shadow-md shadow-primary/20 flex items-center justify-center gap-2"
-                              onClick={handleAnalyze} disabled={analyzing}
-                           >
-                              {analyzing ? <><Sparkles className="w-4 h-4 animate-spin" /> Re-Analyzing...</> : <><Sparkles className="w-4 h-4" /> Update Analysis</>}
-                           </button>
+                           <div className="flex items-center justify-between mt-4 pt-4 border-t border-border-subtle border-dashed">
+                               <p className="text-[10px] text-text-tertiary font-bold tracking-wider uppercase">
+                                   Analyzed {job.aiAnalyzedAt ? formatDistanceToNow(new Date(job.aiAnalyzedAt)) + ' ago' : 'recently'}
+                               </p>
+                               <button 
+                                  className="text-xs font-bold text-primary hover:text-primary-hover flex items-center gap-1 transition-colors disabled:opacity-50"
+                                  onClick={handleAnalyze} disabled={analyzing}
+                               >
+                                  <RefreshCw className={`w-3.5 h-3.5 ${analyzing ? 'animate-spin' : ''}`} /> 
+                                  {analyzing ? "Re-Analyzing..." : "Re-analyze"}
+                               </button>
+                           </div>
                         </>
                      ) : (
                         <div className="text-center py-6">
@@ -348,18 +433,24 @@ export function JobDetailClient({ job }: JobDetailProps) {
 
             </div>
             
-            {/* Interview Prep Skeleton (Future Feature mentioned in Next Steps) */}
-            <div className="bg-bg-surface border border-border-subtle rounded-2xl p-6 shadow-sm">
+            {/* Interview Prep Summary */}
+            <div className="bg-bg-surface border border-border-subtle rounded-2xl p-6 shadow-sm mt-6">
                <h3 className="text-sm font-extrabold text-text-primary mb-4">Interview Prep Summary</h3>
                <div className="space-y-3">
-                  <div className="bg-bg-surface-elevated p-3 rounded-xl border border-border-subtle opacity-70">
-                     <p className="text-xs font-bold text-text-secondary mb-1">Behavioral Question</p>
-                     <p className="text-xs text-text-tertiary line-clamp-2">"Tell me about a time you had to defend a technical decision..."</p>
-                  </div>
-                  <div className="bg-bg-surface-elevated p-3 rounded-xl border border-border-subtle opacity-70">
-                     <p className="text-xs font-bold text-text-secondary mb-1">Technical Focus</p>
-                     <p className="text-xs text-text-tertiary">Prepare to discuss high-level architecture decisions.</p>
-                  </div>
+                  {job.aiCoachTips && job.aiCoachTips.length > 0 ? (
+                     job.aiCoachTips.map((tip: string, index: number) => (
+                        <div key={index} className="bg-bg-surface-elevated p-3 rounded-xl border border-border-subtle opacity-90">
+                           <div className="flex gap-2">
+                               <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                               <p className="text-xs text-text-secondary leading-relaxed p-0 m-0">{tip}</p>
+                           </div>
+                        </div>
+                     ))
+                  ) : (
+                     <div className="text-center py-4 bg-bg-surface-elevated rounded-xl border border-border-subtle">
+                         <p className="text-xs text-text-tertiary">Run AI Analysis to generate personalized interview prep tips based on your resume gaps.</p>
+                     </div>
+                  )}
                </div>
             </div>
 

@@ -6,23 +6,10 @@ export const authConfig = {
     signIn: "/login",
   },
   callbacks: {
-    authorized({ auth, request: { nextUrl } }) {
-      const isLoggedIn = !!auth?.user;
-      const isOnDashboard = nextUrl.pathname.startsWith("/dashboard") || 
-                            nextUrl.pathname.startsWith("/jobs") || 
-                            nextUrl.pathname.startsWith("/settings") ||
-                            nextUrl.pathname.startsWith("/analytics");
-                            
-      if (isOnDashboard) {
-        if (isLoggedIn) return true;
-        return false; // Redirect unauthenticated users to login page
-      } else if (isLoggedIn) {
-         // Redirect to dashboard if already logged in and on home/login page
-         if (nextUrl.pathname === "/" || nextUrl.pathname === "/login" || nextUrl.pathname === "/signup") {
-            return Response.redirect(new URL("/dashboard", nextUrl));
-         }
-      }
-      return true;
+    // Route protection is handled in middleware.ts
+    // This callback is only used for API route protection
+    authorized({ auth }) {
+      return !!auth?.user;
     },
   },
 } satisfies NextAuthConfig;

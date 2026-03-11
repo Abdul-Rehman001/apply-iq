@@ -49,7 +49,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           await User.create({
             email: user.email,
             name: user.name,
+            image: user.image,
             provider: "google",
+            completedOnboarding: false, // new google users need onboarding
           });
         }
       }
@@ -62,6 +64,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           const dbUser = await User.findOne({ email: user.email });
           if (dbUser) {
             token.id = dbUser._id.toString();
+            token.completedOnboarding = dbUser.completedOnboarding ?? true;
           } else if (account?.provider === "credentials") {
             // This should rarely happen as authorize already checked
             token.id = user.id;
@@ -76,6 +79,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async session({ session, token }) {
       if (session.user && token?.id) {
         session.user.id = token.id as string;
+        (session.user as any).completedOnboarding = token.completedOnboarding ?? true;
       }
       return session;
     },

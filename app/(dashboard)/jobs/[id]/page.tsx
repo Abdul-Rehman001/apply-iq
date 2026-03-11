@@ -2,15 +2,21 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import dbConnect from "@/lib/mongodb";
 import { Job } from "@/models/Job";
+import { User } from "@/models/User";
 import { JobDetailClient } from "@/components/jobs/JobDetailClient";
-import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 
-async function getJob(id: string, userId: string) {
+async function getJobAndUser(id: string, userId: string) {
   await dbConnect();
-  const job = await Job.findOne({ _id: id, userId });
-  if (!job) return null;
-  return JSON.parse(JSON.stringify(job));
+  const [job, user] = await Promise.all([
+    Job.findOne({ _id: id, userId }),
+    User.findById(userId).select("resumeText")
+  ]);
+  
+  return {
+    job: job ? JSON.parse(JSON.stringify(job)) : null,
+    hasResume: !!user?.resumeText && user.resumeText.length > 50
+  };
 }
 
 export default async function JobDetailPage(props: { params: Promise<{ id: string }> }) {
@@ -21,22 +27,21 @@ export default async function JobDetailPage(props: { params: Promise<{ id: strin
   }
 
   // @ts-ignore
-  const job = await getJob(params.id, session.user.id);
+  const { job, hasResume } = await getJobAndUser(params.id, session.user.id);
 
   if (!job) {
     return <div>Job not found</div>;
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-2">
-         <Link href="/jobs" className="flex items-center gap-1 text-sm font-semibold text-text-secondary hover:text-text-primary transition-colors">
-            <ChevronLeft className="w-4 h-4" />
-            Back to Jobs
-         </Link>
-      </div>
-      
-      <JobDetailClient job={job} />
+    <div className="space-y-6 max-w-6xl mx-auto">
+      <Breadcrumb items={[
+        { label: "My Jobs", href: "/jobs" },
+        { label: `${job.title} — ${job.company}` },
+      ]} />
+
+      <JobDetailClient job={job} hasResume={hasResume} />
     </div>
   );
 }
+

@@ -5,50 +5,78 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
-import { 
-  LayoutDashboard, Briefcase, BarChart2, Settings, LogOut, Zap, 
-  ChevronsLeft, ChevronsRight, X, Sun, Moon
+import {
+  LayoutDashboard, Briefcase, BarChart2, Settings, LogOut, Zap,
+  ChevronsLeft, ChevronsRight, X, Sun, Moon, Sparkles, Bell
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 
-const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "My Jobs", href: "/jobs", icon: Briefcase },
-  { name: "Analytics", href: "/analytics", icon: BarChart2 },
-  { name: "Settings", href: "/settings", icon: Settings },
-];
-
 interface SidebarProps {
-  user?: {
-    name?: string | null;
-    email?: string | null;
-    image?: string | null;
-  };
+  user?: { name?: string | null; email?: string | null; image?: string | null };
   collapsed: boolean;
   onToggle: () => void;
   mobileOpen: boolean;
   onMobileClose: () => void;
+  /** Count of unanalyzed jobs for AI Coach badge */
+  unanalyzedCount?: number;
+  /** Whether user has a resume (for Settings red dot) */
+  hasResume?: boolean;
+  /** Count of follow-ups due today (for Dashboard bell badge) */
+  followUpDueCount?: number;
 }
 
-export function Sidebar({ user, collapsed, onToggle, mobileOpen, onMobileClose }: SidebarProps) {
+export function Sidebar({
+  user, collapsed, onToggle, mobileOpen, onMobileClose,
+  unanalyzedCount = 0, hasResume = true, followUpDueCount = 0
+}: SidebarProps) {
   const pathname = usePathname();
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const isDark = resolvedTheme === "dark";
 
+  const navigation = [
+    {
+      name: "Dashboard", href: "/dashboard", icon: LayoutDashboard,
+      badge: followUpDueCount > 0 ? (
+        <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white">
+          {followUpDueCount > 9 ? "9+" : followUpDueCount}
+        </span>
+      ) : null,
+    },
+    { name: "My Jobs", href: "/jobs", icon: Briefcase, badge: null },
+    {
+      name: "AI Coach", href: "/ai-coach", icon: Sparkles,
+      badge: unanalyzedCount > 0 ? (
+        <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-primary/20 px-1.5 text-[10px] font-bold text-primary border border-primary/30">
+          {unanalyzedCount > 9 ? "9+" : unanalyzedCount}
+        </span>
+      ) : null,
+    },
+    { name: "Analytics", href: "/analytics", icon: BarChart2, badge: null },
+    {
+      name: "Settings", href: "/settings", icon: Settings,
+      badge: !hasResume ? (
+        <span className="ml-auto w-2 h-2 rounded-full bg-red-500 shrink-0" />
+      ) : null,
+    },
+  ];
+
   const sidebarContent = (
     <div className="flex flex-col h-full">
-      {/* Logo */}
-      <div className={cn("flex items-center gap-3 mb-8", collapsed ? "px-4 justify-center" : "px-6")}>
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-purple-800 flex items-center justify-center shadow-[0_0_15px_rgba(166,137,250,0.4)] shrink-0">
-          <Zap className="h-4 w-4 text-text-primary" strokeWidth={3} />
+      {/* Logo & Collapse */}
+      <div className={cn("flex items-center mb-8", collapsed ? "px-4 flex-col gap-4 justify-center" : "px-6 justify-between")}>
+        <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-purple-800 flex items-center justify-center shadow-[0_0_15px_rgba(166,137,250,0.4)] shrink-0">
+              <Zap className="h-4 w-4 text-white" strokeWidth={3} />
+            </div>
+            {!collapsed && (
+              <span className="text-lg font-extrabold tracking-tight text-text-primary whitespace-nowrap">ApplyIQ</span>
+            )}
         </div>
-        {!collapsed && (
-          <span className="text-lg font-extrabold tracking-tight text-text-primary whitespace-nowrap">
-            ApplyIQ
-          </span>
-        )}
+        <button onClick={onToggle} className="hidden lg:flex p-1.5 rounded-lg text-text-tertiary hover:text-text-primary hover:bg-sidebar-hover transition-colors" title={collapsed ? "Expand" : "Collapse"}>
+          {collapsed ? <ChevronsRight className="h-5 w-5" /> : <ChevronsLeft className="h-5 w-5" />}
+        </button>
       </div>
 
       {/* Navigation */}
@@ -73,7 +101,8 @@ export function Sidebar({ user, collapsed, onToggle, mobileOpen, onMobileClose }
                 "h-[18px] w-[18px] shrink-0 transition-colors duration-200",
                 isActive ? "text-primary" : "text-text-tertiary group-hover:text-text-secondary"
               )} />
-              {!collapsed && <span>{item.name}</span>}
+              {!collapsed && <span className="flex-1">{item.name}</span>}
+              {!collapsed && item.badge}
             </Link>
           );
         })}
@@ -89,7 +118,6 @@ export function Sidebar({ user, collapsed, onToggle, mobileOpen, onMobileClose }
             collapsed ? "px-3 py-3 justify-center" : "px-3 py-2.5 w-full"
           )}
         >
-          {/* Render neutral icon on server; correct icon after mount */}
           {!mounted ? (
             <span className="h-[18px] w-[18px] shrink-0" />
           ) : isDark ? (
@@ -97,9 +125,7 @@ export function Sidebar({ user, collapsed, onToggle, mobileOpen, onMobileClose }
           ) : (
             <Moon className="h-[18px] w-[18px] shrink-0" />
           )}
-          {!collapsed && mounted && (
-            <span>{isDark ? "Light Mode" : "Dark Mode"}</span>
-          )}
+          {!collapsed && mounted && <span>{isDark ? "Light Mode" : "Dark Mode"}</span>}
           {!collapsed && !mounted && <span>Theme</span>}
         </button>
       </div>
@@ -141,12 +167,7 @@ export function Sidebar({ user, collapsed, onToggle, mobileOpen, onMobileClose }
         )}
       </div>
 
-      {/* Collapse Toggle (desktop) */}
-      <div className={cn("hidden lg:flex mt-4", collapsed ? "justify-center px-2" : "px-3")}>
-        <button onClick={onToggle} className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-text-tertiary hover:text-text-primary hover:bg-sidebar-hover transition-colors text-xs font-medium">
-          {collapsed ? <ChevronsRight className="h-4 w-4" /> : <><ChevronsLeft className="h-4 w-4" /> <span>Collapse</span></>}
-        </button>
-      </div>
+
     </div>
   );
 
@@ -155,7 +176,6 @@ export function Sidebar({ user, collapsed, onToggle, mobileOpen, onMobileClose }
       {mobileOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden" onClick={onMobileClose} />
       )}
-
       {/* Mobile Sidebar */}
       <aside className={cn(
         "fixed top-0 left-0 h-screen w-64 bg-sidebar border-r border-border-subtle flex flex-col py-6 z-50 transition-transform duration-300 lg:hidden",
@@ -166,7 +186,6 @@ export function Sidebar({ user, collapsed, onToggle, mobileOpen, onMobileClose }
         </button>
         {sidebarContent}
       </aside>
-
       {/* Desktop Sidebar */}
       <aside className={cn(
         "hidden lg:flex fixed top-0 left-0 h-screen bg-sidebar border-r border-border-subtle flex-col py-6 z-50 transition-all duration-300",
