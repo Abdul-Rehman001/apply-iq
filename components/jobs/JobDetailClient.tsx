@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -7,7 +7,7 @@ import { toast } from "react-hot-toast";
 import { 
   Bot, Sparkles, Building2, MapPin, DollarSign, ArrowLeft, 
   CheckCircle2, AlertTriangle, ShieldAlert, Target, Zap, 
-  FileText, Copy, RefreshCw, ExternalLink, ChevronDown, ChevronUp, Calendar
+  FileText, Copy, RefreshCw, ExternalLink, ChevronDown, ChevronUp, Calendar, Mail
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { formatDistanceToNow, isPast } from "date-fns";
@@ -370,17 +370,33 @@ export function JobDetailClient({ job, hasResume }: JobDetailProps) {
                               </div>
                            )}
                            
-                           <div className="flex items-center justify-between mt-4 pt-4 border-t border-border-subtle border-dashed">
-                               <p className="text-[10px] text-text-tertiary font-bold tracking-wider uppercase">
-                                   Analyzed {job.aiAnalyzedAt ? formatDistanceToNow(new Date(job.aiAnalyzedAt)) + ' ago' : 'recently'}
-                               </p>
-                               <button 
-                                  className="text-xs font-bold text-primary hover:text-primary-hover flex items-center gap-1 transition-colors disabled:opacity-50"
-                                  onClick={handleAnalyze} disabled={analyzing}
-                               >
-                                  <RefreshCw className={`w-3.5 h-3.5 ${analyzing ? 'animate-spin' : ''}`} /> 
-                                  {analyzing ? "Re-Analyzing..." : "Re-analyze"}
-                               </button>
+                           <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-border-subtle border-dashed">
+                               <div className="flex items-center justify-between">
+                                   <p className="text-[10px] text-text-tertiary font-bold tracking-wider uppercase">
+                                       Analyzed {job.aiAnalyzedAt ? formatDistanceToNow(new Date(job.aiAnalyzedAt)) + ' ago' : 'recently'}
+                                   </p>
+                                   <button 
+                                      className="text-xs font-bold text-primary hover:text-primary-hover flex items-center gap-1 transition-colors disabled:opacity-50"
+                                      onClick={handleAnalyze} disabled={analyzing}
+                                    >
+                                      <RefreshCw className={`w-3.5 h-3.5 ${analyzing ? 'animate-spin' : ''}`} /> 
+                                      {analyzing ? "Re-Analyzing..." : "Re-analyze"}
+                                   </button>
+                               </div>
+                               <div className="grid grid-cols-2 gap-2 mt-2">
+                                  <Link 
+                                    href={`/ai-coach?tab=intelligence&jobId=${job._id}`}
+                                    className="flex items-center justify-center gap-2 py-2 bg-bg-surface-elevated border border-border-subtle rounded-xl text-[10px] font-bold text-text-secondary hover:text-primary hover:border-primary/30 transition-all"
+                                  >
+                                    <ShieldAlert className="w-3 h-3 text-red-400" /> Red Flags
+                                  </Link>
+                                  <Link 
+                                    href={`/ai-coach?tab=outreach&jobId=${job._id}`}
+                                    className="flex items-center justify-center gap-2 py-2 bg-bg-surface-elevated border border-border-subtle rounded-xl text-[10px] font-bold text-text-secondary hover:text-primary hover:border-primary/30 transition-all"
+                                  >
+                                    <Mail className="w-3 h-3 text-primary" /> Outreach
+                                  </Link>
+                               </div>
                            </div>
                         </>
                      ) : (

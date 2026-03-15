@@ -13,9 +13,9 @@ import {
 ───────────────────────────────────────────── */
 const GlassCard = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
   <div className={`
-    backdrop-blur-xl bg-white/5 dark:bg-white/[0.03]
-    border border-white/10 dark:border-white/[0.06]
-    rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)]
+    backdrop-blur-xl bg-bg-surface/60 dark:bg-white/[0.03]
+    border border-border-default/40 dark:border-white/[0.06]
+    rounded-2xl shadow-sm
     ${className}
   `}>
     {children}
@@ -23,7 +23,7 @@ const GlassCard = ({ children, className = "" }: { children: React.ReactNode; cl
 );
 
 const StatusBadge = ({ label, color }: { label: string; color: string }) => (
-  <span className={`inline-flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full border ${color}`}>
+  <span className={`inline-flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full border border-current/20 ${color}`}>
     <span className="w-1.5 h-1.5 rounded-full bg-current" />
     {label}
   </span>
@@ -41,18 +41,18 @@ const JobCard = ({
     transition={{ delay, duration: 0.5 }}
     className="
       group relative backdrop-blur-xl
-      bg-white/[0.06] dark:bg-white/[0.04]
-      border border-white/10 dark:border-white/[0.06]
+      bg-bg-surface-elevated/60 dark:bg-white/[0.04]
+      border border-border-default/40 dark:border-white/[0.06]
       rounded-xl p-3 shadow-sm
-      hover:bg-white/10 dark:hover:bg-white/[0.06]
+      hover:bg-bg-surface-hover dark:hover:bg-white/[0.06]
       hover:border-purple-400/30 hover:-translate-y-0.5
       transition-all duration-200 cursor-grab
     "
   >
     <div className="flex items-start justify-between mb-2">
       <div>
-        <p className="text-[10px] text-white/40 font-medium">{company}</p>
-        <p className="text-xs text-white/80 font-semibold leading-tight mt-0.5">{role}</p>
+        <p className="text-[10px] text-text-tertiary font-medium">{company}</p>
+        <p className="text-xs text-text-primary font-semibold leading-tight mt-0.5">{role}</p>
       </div>
       <div className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md ${
         match >= 85 ? "bg-emerald-500/20 text-emerald-400" :
@@ -71,7 +71,7 @@ const JobCard = ({
 ───────────────────────────────────────────── */
 export default function Home() {
   return (
-    <div className="relative min-h-screen bg-[#07050F] dark:bg-[#07050F] overflow-x-hidden font-sans">
+    <div className="relative min-h-screen bg-bg-base overflow-x-hidden font-sans transition-colors duration-300">
 
       {/* ── GRADIENT MESH BACKGROUND ── */}
       <div className="fixed inset-0 pointer-events-none z-0">
@@ -89,15 +89,22 @@ export default function Home() {
           bg-fuchsia-600/10 blur-[80px] animate-[drift_20s_ease-in-out_2s_infinite_alternate-reverse]" />
 
         {/* Fine grid overlay */}
-        <div className="absolute inset-0 opacity-[0.03]"
-          style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.5) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.5) 1px,transparent 1px)", backgroundSize: "60px 60px" }} />
+        <div className="absolute inset-0 opacity-[0.04] dark:opacity-[0.03] pointer-events-none text-black dark:text-white"
+          style={{ 
+            backgroundImage: `
+              linear-gradient(to right, currentColor 1px, transparent 1px),
+              linear-gradient(to bottom, currentColor 1px, transparent 1px)
+            `,
+            backgroundSize: "60px 60px"
+          }} 
+        />
       </div>
 
       {/* ── NAV ── */}
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between
         px-6 lg:px-10 h-[60px]
-        backdrop-blur-2xl bg-white/[0.03] dark:bg-black/20
-        border-b border-white/[0.06]">
+        backdrop-blur-2xl bg-bg-surface/80 dark:bg-black/20
+        border-b border-border-subtle">
 
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 group">
@@ -106,15 +113,15 @@ export default function Home() {
             group-hover:shadow-purple-500/50 transition-shadow">
             <Zap className="w-4 h-4 text-white" strokeWidth={2.5} />
           </div>
-          <span className="text-white font-bold text-lg tracking-tight">ApplyIQ</span>
+          <span className="text-black dark:text-white font-bold text-lg tracking-tight">ApplyIQ</span>
         </Link>
 
         {/* Center links — hidden on mobile */}
         <div className="hidden md:flex items-center gap-1">
           {["Features", "Pricing", "Blog"].map(l => (
             <Link key={l} href="#"
-              className="px-4 py-1.5 text-sm text-white/50 hover:text-white/90
-              rounded-lg hover:bg-white/[0.06] transition-all duration-150 font-medium">
+              className="px-4 py-1.5 text-sm text-black/50 dark:text-white/50 hover:text-black dark:hover:text-white
+              rounded-lg hover:bg-black/[0.03] dark:hover:bg-white/[0.06] transition-all duration-150 font-medium">
               {l}
             </Link>
           ))}
@@ -124,8 +131,8 @@ export default function Home() {
         <div className="flex items-center gap-2">
           <ModeToggle />
           <Link href="/login"
-            className="hidden sm:block px-4 py-1.5 text-sm font-medium text-white/60
-            hover:text-white transition-colors">
+            className="hidden sm:block px-4 py-1.5 text-sm font-medium text-black/60 dark:text-white/60
+            hover:text-black dark:hover:text-white transition-colors">
             Log in
           </Link>
           <Link href="/signup"
@@ -153,9 +160,9 @@ export default function Home() {
             className="flex justify-center mb-8"
           >
             <div className="inline-flex items-center gap-2 px-4 py-1.5
-              backdrop-blur-xl bg-white/[0.06] border border-purple-400/20
-              rounded-full text-xs font-semibold text-purple-300">
-              <span className="w-1.5 h-1.5 rounded-full bg-purple-400 shadow-[0_0_6px_#a78bfa] animate-pulse" />
+              backdrop-blur-xl bg-bg-surface-elevated/80 dark:bg-white/[0.06] border border-purple-400/20
+              rounded-full text-xs font-semibold text-purple-600 dark:text-purple-300">
+              <span className="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_6px_#a78bfa] animate-pulse" />
               AI-powered job tracker — free to start
               <ChevronRight className="w-3 h-3 opacity-60" />
             </div>
@@ -170,12 +177,12 @@ export default function Home() {
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.1 }}
-                className="text-[clamp(48px,7vw,88px)] font-bold leading-[1.0] tracking-[-0.04em] text-white mb-6"
+                className="text-[clamp(44px,7vw,88px)] font-bold leading-[1.05] md:leading-[1.0] tracking-[-0.04em] text-black dark:text-white mb-6"
               >
                 Your job search,{" "}
                 <br />
                 <span className="relative">
-                  <span className="bg-gradient-to-r from-purple-300 via-violet-300 to-fuchsia-300
+                  <span className="bg-gradient-to-r from-purple-600 via-violet-500 to-fuchsia-600 dark:from-purple-300 dark:via-violet-300 dark:to-fuchsia-300
                     bg-clip-text text-transparent">
                     finally organized.
                   </span>
@@ -189,7 +196,7 @@ export default function Home() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                className="text-lg text-white/50 leading-relaxed max-w-xl mb-8 font-light"
+                className="text-lg text-black/50 dark:text-white/50 leading-relaxed max-w-xl mb-8 font-light"
               >
                 Stop juggling spreadsheets and sticky notes.
                 ApplyIQ tracks every application, scores your resume with AI,
@@ -215,9 +222,9 @@ export default function Home() {
                 </Link>
                 <Link href="#demo"
                   className="flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl
-                  text-sm font-semibold text-white/70
-                  backdrop-blur-xl bg-white/[0.06] border border-white/10
-                  hover:bg-white/10 hover:text-white hover:border-white/20
+                  text-sm font-semibold text-text-secondary
+                  backdrop-blur-xl bg-bg-surface-elevated/40 border border-border-subtle
+                  hover:bg-bg-surface-hover hover:text-text-primary hover:border-border-default
                   transition-all duration-200">
                   Watch demo
                 </Link>
@@ -232,7 +239,7 @@ export default function Home() {
               >
                 <div className="flex -space-x-2">
                   {["#a78bfa","#818cf8","#60a5fa","#34d399","#f472b6"].map((c,i) => (
-                    <div key={i} className="w-7 h-7 rounded-full border-2 border-[#07050F]
+                    <div key={i} className="w-7 h-7 rounded-full border-2 border-bg-base
                       flex items-center justify-center text-[9px] font-bold text-white"
                       style={{ background: c }}>
                       {String.fromCharCode(65+i)}
@@ -245,8 +252,8 @@ export default function Home() {
                       <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
                     ))}
                   </div>
-                  <p className="text-xs text-white/40">
-                    Loved by <span className="text-white/70 font-semibold">2,400+</span> job seekers
+                  <p className="text-xs text-text-tertiary">
+                    Loved by <span className="text-text-secondary font-semibold">2,400+</span> job seekers
                   </p>
                 </div>
               </motion.div>
@@ -298,10 +305,10 @@ export default function Home() {
                   { label: "Applications", value: "47", delta: "+8 this week", color: "text-purple-400" },
                   { label: "Response rate", value: "24%", delta: "↑ above avg", color: "text-emerald-400" },
                 ].map(s => (
-                  <GlassCard key={s.label} className="p-3.5">
-                    <p className="text-[10px] text-white/40 font-medium mb-1.5">{s.label}</p>
+                  <GlassCard key={s.label} className="p-3.5 bg-bg-surface/60 border-border-default/50">
+                    <p className="text-[10px] text-text-tertiary font-medium mb-1.5">{s.label}</p>
                     <p className={`text-2xl font-bold ${s.color} tracking-tight`}>{s.value}</p>
-                    <p className="text-[10px] text-white/30 mt-1">{s.delta}</p>
+                    <p className="text-[10px] text-text-tertiary/60 mt-1">{s.delta}</p>
                   </GlassCard>
                 ))}
               </div>
@@ -313,8 +320,8 @@ export default function Home() {
                   🔥
                 </div>
                 <div>
-                  <p className="text-white/80 font-semibold text-sm">12-day streak</p>
-                  <p className="text-[10px] text-white/30">Keep it up — your personal best!</p>
+                  <p className="text-text-primary font-semibold text-sm">12-day streak</p>
+                  <p className="text-[10px] text-text-tertiary">Keep it up — your personal best!</p>
                 </div>
                 <div className="ml-auto flex gap-0.5">
                   {[...Array(7)].map((_,i) => (
@@ -347,24 +354,24 @@ export default function Home() {
               blur-2xl rounded-full" />
 
             {/* Browser frame */}
-            <div className="relative rounded-2xl overflow-hidden border border-white/10
-              shadow-[0_40px_80px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.05)]
-              backdrop-blur-sm bg-[#0D0A18]">
+            <div className="relative rounded-2xl overflow-hidden border border-border-default/40 dark:border-white/10
+              shadow-[0_40px_80px_rgba(0,0,0,0.1),0_0_0_1px_rgba(0,0,0,0.05)] dark:shadow-[0_40px_80px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.05)]
+              backdrop-blur-sm bg-bg-surface dark:bg-[#0D0A18]">
 
               {/* Browser bar */}
-              <div className="flex items-center gap-3 px-5 py-3.5 border-b border-white/[0.06]
-                bg-[#110D1E]/80">
+              <div className="flex items-center gap-3 px-5 py-3.5 border-b border-border-subtle dark:border-white/[0.06]
+                bg-bg-surface-elevated/80 dark:bg-[#110D1E]/80">
                 <div className="flex gap-1.5">
                   <div className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
                   <div className="w-2.5 h-2.5 rounded-full bg-amber-500/70" />
                   <div className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
                 </div>
-                <div className="flex-1 max-w-xs mx-auto h-6 rounded-lg bg-white/[0.04]
-                  border border-white/[0.06] flex items-center justify-center
-                  text-[11px] text-white/30 font-mono tracking-tight">
+                <div className="flex-1 max-w-xs mx-auto h-6 rounded-lg bg-bg-base dark:bg-white/[0.04]
+                  border border-border-subtle dark:border-white/[0.06] flex items-center justify-center
+                  text-[11px] text-text-tertiary dark:text-white/30 font-mono tracking-tight">
                   app.applyiq.com/dashboard
                 </div>
-                <div className="w-16 h-5 rounded bg-white/[0.03]" />
+                <div className="w-16 h-5 rounded bg-bg-base dark:bg-white/[0.03]" />
               </div>
 
               {/* Dashboard content */}
@@ -378,9 +385,9 @@ export default function Home() {
                         flex items-center justify-center">
                         <Zap className="w-3 h-3 text-white" strokeWidth={2.5} />
                       </div>
-                      <h2 className="text-white/90 font-bold text-sm">Good morning, Rahul 👋</h2>
+                      <h2 className="text-text-primary dark:text-white/90 font-bold text-sm">Good morning, Rahul 👋</h2>
                     </div>
-                    <p className="text-white/30 text-xs">You have 3 follow-ups due today</p>
+                    <p className="text-text-tertiary dark:text-white/30 text-xs">You have 3 follow-ups due today</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs
@@ -392,7 +399,7 @@ export default function Home() {
                 </div>
 
                 {/* Stat cards */}
-                <div className="grid grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {[
                     { icon: "📤", label: "Applied", value: "47", sub: "+8 this week", c: "from-purple-500/10 to-violet-500/10" },
                     { icon: "📬", label: "Response Rate", value: "24%", sub: "↑ 6% avg", c: "from-blue-500/10 to-indigo-500/10" },
@@ -404,19 +411,19 @@ export default function Home() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.6 + i * 0.1 }}
-                      className={`p-3.5 rounded-xl border border-white/[0.06]
-                        bg-gradient-to-br ${s.c} backdrop-blur-sm`}
+                      className={`p-3 md:p-3.5 rounded-xl border border-border-subtle dark:border-white/[0.06]
+                        bg-bg-surface-elevated/40 dark:bg-white/[0.02] backdrop-blur-sm`}
                     >
-                      <div className="text-lg mb-1.5">{s.icon}</div>
-                      <div className="text-white/90 font-bold text-xl leading-none mb-1">{s.value}</div>
-                      <div className="text-white/40 text-[10px] font-medium">{s.label}</div>
-                      <div className="text-white/25 text-[9px] mt-0.5">{s.sub}</div>
+                      <div className="text-base md:text-lg mb-1 md:mb-1.5">{s.icon}</div>
+                      <div className="text-text-primary dark:text-white/90 font-bold text-lg md:text-xl leading-none mb-1">{s.value}</div>
+                      <div className="text-text-tertiary dark:text-white/40 text-[9px] md:text-[10px] font-medium">{s.label}</div>
+                      <div className="text-text-tertiary/60 dark:text-white/25 text-[8px] md:text-[9px] mt-0.5">{s.sub}</div>
                     </motion.div>
                   ))}
                 </div>
 
                 {/* Kanban columns */}
-                <div className="grid grid-cols-5 gap-2 flex-1">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 flex-1">
                   {[
                     {
                       label: "Saved", count: 2,
@@ -454,19 +461,19 @@ export default function Home() {
                       ]
                     },
                   ].map((col, ci) => (
-                    <div key={col.label} className={`rounded-xl p-2.5 border ${col.borderColor}
-                      bg-white/[0.02] flex flex-col gap-2`}>
+                    <div key={col.label} className={`rounded-xl p-2 md:p-2.5 border ${col.borderColor}
+                      bg-bg-surface-elevated/20 dark:bg-white/[0.02] flex flex-col gap-2 ${ci >= 2 ? "hidden sm:flex" : "flex"} ${ci >= 3 ? "sm:hidden md:flex" : ""}`}>
                       <div className="flex items-center justify-between px-0.5">
                         <span className={`text-[10px] font-bold ${col.color}`}>{col.label}</span>
-                        <span className="text-[9px] text-white/20 font-semibold
-                          bg-white/5 px-1.5 py-0.5 rounded-full">{col.count}</span>
+                        <span className="text-[9px] text-text-tertiary dark:text-white/20 font-semibold
+                          bg-bg-base dark:bg-white/5 px-1.5 py-0.5 rounded-full">{col.count}</span>
                       </div>
                       {col.jobs.map((j, ji) => (
                         <JobCard key={ji} {...j} delay={0.8 + ci * 0.1 + ji * 0.05} />
                       ))}
                       {col.jobs.length === 0 && (
                         <div className="flex-1 flex items-center justify-center
-                          text-[10px] text-white/15 text-center py-4">
+                          text-[10px] text-text-tertiary dark:text-white/15 text-center py-4 leading-relaxed">
                           🎉<br />Your offer<br />lands here
                         </div>
                       )}
@@ -482,7 +489,7 @@ export default function Home() {
       {/* ═══════════════════════════════════════
           FEATURES — bento grid layout
       ═══════════════════════════════════════ */}
-      <section className="relative z-10 px-6 lg:px-16 py-20">
+      <section id="features" className="relative z-10 px-6 lg:px-16 py-20">
         <div className="max-w-7xl mx-auto">
 
           <motion.div
@@ -492,9 +499,9 @@ export default function Home() {
             className="mb-12"
           >
             <p className="text-xs font-bold text-purple-400 uppercase tracking-[0.2em] mb-3">Features</p>
-            <h2 className="text-[clamp(32px,4vw,52px)] font-bold text-white tracking-tight leading-tight">
+            <h2 className="text-[clamp(28px,4vw,52px)] font-bold text-black dark:text-white tracking-tight leading-tight">
               Everything you need to<br />
-              <span className="text-white/30">get hired faster.</span>
+              <span className="text-black/20 dark:text-white/30">get hired faster.</span>
             </h2>
           </motion.div>
 
@@ -507,20 +514,20 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="md:col-span-2 relative rounded-2xl overflow-hidden border border-white/[0.07]
-                bg-gradient-to-br from-purple-900/20 via-[#0D0A18] to-violet-900/10
+              className="md:col-span-2 relative rounded-2xl overflow-hidden border border-border-subtle
+                bg-bg-surface-elevated/50 dark:bg-gradient-to-br dark:from-purple-900/20 dark:via-[#0D0A18] dark:to-violet-900/10
                 p-7 group hover:border-purple-500/20 transition-all duration-300"
             >
-              <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full
-                blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-purple-500/20 transition-colors" />
+              <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/5 dark:bg-purple-500/10 rounded-full
+                blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-purple-500/10 dark:group-hover:bg-purple-500/20 transition-colors" />
               <div className="relative">
                 <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20
                   flex items-center justify-center mb-4">
-                  <Sparkles className="w-5 h-5 text-purple-400" />
+                  <Sparkles className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-2">AI Career Coach</h3>
-                <p className="text-white/40 text-sm leading-relaxed max-w-sm">
-                  Paste any job description. Gemini AI scores your resume, identifies gaps,
+                <h3 className="text-xl font-bold text-text-primary mb-2">AI Career Coach</h3>
+                <p className="text-text-secondary text-sm leading-relaxed max-w-sm">
+                  Paste any job description. Grok AI scores your resume, identifies gaps,
                   drafts your cover letter, and preps you for interviews — in seconds.
                 </p>
                 <div className="mt-6 space-y-2">
@@ -529,8 +536,8 @@ export default function Home() {
                     "Personalized cover letter draft",
                     "Likely interview questions + model answers",
                   ].map(f => (
-                    <div key={f} className="flex items-center gap-2.5 text-sm text-white/60">
-                      <CheckCircle className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                    <div key={f} className="flex items-center gap-2.5 text-sm text-text-secondary">
+                      <CheckCircle className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400 shrink-0" />
                       {f}
                     </div>
                   ))}
@@ -544,16 +551,16 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="rounded-2xl border border-white/[0.07]
-                bg-gradient-to-br from-[#0D0A18] to-blue-900/10
+              className="rounded-2xl border border-border-subtle
+                bg-bg-surface-elevated/50 dark:bg-gradient-to-br dark:from-[#0D0A18] dark:to-blue-900/10
                 p-7 group hover:border-blue-500/20 transition-all duration-300"
             >
               <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20
                 flex items-center justify-center mb-4">
-                <LayoutDashboard className="w-5 h-5 text-blue-400" />
+                <LayoutDashboard className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">Smart Kanban</h3>
-              <p className="text-white/40 text-sm leading-relaxed">
+              <h3 className="text-xl font-bold text-text-primary mb-2">Smart Kanban</h3>
+              <p className="text-text-secondary text-sm leading-relaxed">
                 Drag and drop jobs across stages. Visual, fast, and satisfying. See your whole
                 pipeline at a glance.
               </p>
@@ -565,16 +572,16 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="rounded-2xl border border-white/[0.07]
-                bg-gradient-to-br from-[#0D0A18] to-emerald-900/10
+              className="rounded-2xl border border-border-subtle
+                bg-bg-surface-elevated/50 dark:bg-gradient-to-br dark:from-[#0D0A18] dark:to-emerald-900/10
                 p-7 group hover:border-emerald-500/20 transition-all duration-300"
             >
               <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20
                 flex items-center justify-center mb-4">
-                <TrendingUp className="w-5 h-5 text-emerald-400" />
+                <TrendingUp className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">Analytics & Insights</h3>
-              <p className="text-white/40 text-sm leading-relaxed">
+              <h3 className="text-xl font-bold text-text-primary mb-2">Analytics & Insights</h3>
+              <p className="text-text-secondary text-sm leading-relaxed">
                 Response rates, application funnels, streak tracking. Know exactly what's working.
               </p>
             </motion.div>
@@ -585,18 +592,18 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="md:col-span-2 rounded-2xl border border-white/[0.07]
-                bg-gradient-to-br from-[#0D0A18] via-fuchsia-900/10 to-[#0D0A18]
+              className="md:col-span-2 rounded-2xl border border-border-subtle
+                bg-bg-surface-elevated/50 dark:bg-gradient-to-br dark:from-[#0D0A18] dark:via-fuchsia-900/10 dark:to-[#0D0A18]
                 p-7 group hover:border-fuchsia-500/20 transition-all duration-300
                 flex flex-col md:flex-row gap-6 items-start"
             >
               <div className="flex-1">
                 <div className="w-10 h-10 rounded-xl bg-fuchsia-500/10 border border-fuchsia-500/20
                   flex items-center justify-center mb-4">
-                  <FileSearch className="w-5 h-5 text-fuchsia-400" />
+                  <FileSearch className="w-5 h-5 text-fuchsia-600 dark:text-fuchsia-400" />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-2">Resume Analyzer</h3>
-                <p className="text-white/40 text-sm leading-relaxed max-w-xs">
+                <h3 className="text-xl font-bold text-text-primary mb-2">Resume Analyzer</h3>
+                <p className="text-text-secondary text-sm leading-relaxed max-w-xs">
                   Upload your PDF resume once. Every job you add gets instantly analyzed
                   against your skills and experience.
                 </p>
@@ -621,11 +628,11 @@ export default function Home() {
                       </defs>
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-white font-bold text-lg leading-none">84%</span>
-                      <span className="text-white/30 text-[9px]">match</span>
+                      <span className="text-text-primary font-bold text-lg leading-none">84%</span>
+                      <span className="text-text-tertiary text-[9px]">match</span>
                     </div>
                   </div>
-                  <p className="text-center text-[10px] text-white/40">Stripe · Sr. Frontend Eng.</p>
+                  <p className="text-center text-[10px] text-text-tertiary">Stripe · Sr. Frontend Eng.</p>
                 </GlassCard>
               </div>
             </motion.div>
@@ -643,8 +650,8 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="relative rounded-3xl overflow-hidden
-              border border-white/10
-              bg-gradient-to-br from-purple-900/40 via-[#0D0A18] to-violet-900/30
+              border border-border-subtle
+              bg-bg-surface-elevated/40 dark:bg-gradient-to-br dark:from-purple-900/40 dark:via-[#0D0A18] dark:to-violet-900/30
               p-12 text-center"
           >
             {/* Background orbs inside CTA */}
@@ -652,13 +659,13 @@ export default function Home() {
             <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-violet-500/10 rounded-full blur-3xl" />
 
             <div className="relative">
-              <p className="text-xs font-bold text-purple-400 uppercase tracking-[0.2em] mb-4">
+              <p className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-[0.2em] mb-4">
                 Free to start — no credit card
               </p>
-              <h2 className="text-[clamp(32px,5vw,60px)] font-bold text-white tracking-tight mb-4">
+              <h2 className="text-[clamp(28px,5vw,60px)] font-bold text-text-primary dark:text-white tracking-tight mb-4">
                 Your next offer starts here.
               </h2>
-              <p className="text-white/40 text-lg mb-8 max-w-lg mx-auto">
+              <p className="text-text-secondary dark:text-white/40 text-base md:text-lg mb-8 max-w-lg mx-auto">
                 Join thousands of job seekers who stopped stressing and started landing.
               </p>
               <Link href="/signup"
@@ -677,24 +684,24 @@ export default function Home() {
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="relative z-10 px-6 lg:px-16 py-10 border-t border-white/[0.06]">
+      <footer className="relative z-10 px-6 lg:px-16 py-10 border-t border-border-subtle">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-md bg-gradient-to-br from-purple-500 to-violet-600
               flex items-center justify-center">
               <Zap className="w-3 h-3 text-white" strokeWidth={2.5} />
             </div>
-            <span className="text-white/60 font-semibold text-sm">ApplyIQ</span>
+            <span className="text-black/60 dark:text-white/60 font-semibold text-sm">ApplyIQ</span>
           </div>
           <div className="flex items-center gap-6">
             {["Privacy", "Terms", "Contact"].map(l => (
               <Link key={l} href="#"
-                className="text-xs text-white/30 hover:text-white/60 transition-colors">
+                className="text-xs text-black/30 dark:text-white/30 hover:text-black dark:hover:text-white/60 transition-colors">
                 {l}
               </Link>
             ))}
           </div>
-          <p className="text-xs text-white/20">© 2025 ApplyIQ. All rights reserved.</p>
+          <p className="text-xs text-black/20 dark:text-white/20">© 2026 ApplyIQ. All rights reserved.</p>
         </div>
       </footer>
 

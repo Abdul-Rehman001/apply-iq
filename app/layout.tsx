@@ -1,13 +1,5 @@
 import type { Metadata } from "next";
-import { Manrope } from "next/font/google";
 import "./globals.css";
-
-const manrope = Manrope({
-  subsets: ["latin"],
-  variable: "--font-manrope",
-  weight: ["300", "400", "500", "600", "700", "800"],
-});
-
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "react-hot-toast";
 
@@ -23,17 +15,35 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${manrope.variable} antialiased bg-bg-base text-text-primary min-h-screen`}>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Satisfy&display=swap" rel="stylesheet" />
+        <style dangerouslySetInnerHTML={{ __html: `
+          :root {
+            --font-outfit: 'Outfit', sans-serif;
+          }
+          body {
+            font-family: 'Outfit', sans-serif !important;
+            letter-spacing: 0.015em !important;
+          }
+        `}} />
+      </head>
+      <body className="antialiased bg-bg-base text-text-primary min-h-screen">
         <ThemeProvider
             attribute="class"
             defaultTheme="dark"
-            enableSystem
+            enableSystem={false}
             disableTransitionOnChange
           >
             <Toaster
               position="top-center"
               toastOptions={{
                 className: "!bg-bg-surface !text-text-primary !border !border-border-subtle !shadow-lg !rounded-xl !text-sm !font-medium",
+                style: {
+                  fontFamily: "'Outfit', sans-serif",
+                  letterSpacing: '0.015em',
+                },
                 duration: 3000,
               }}
             />

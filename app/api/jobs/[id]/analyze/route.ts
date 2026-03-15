@@ -27,7 +27,7 @@ export async function POST(
     }
 
     // ✅ Cache check — if already analyzed and data hasn't changed, return cached
-    // This prevents re-calling Gemini on every click and burning through quota
+    // This prevents re-calling Grok on every click and burning through quota
     if (
       job.matchScore !== null &&
       job.matchScore !== undefined &&
@@ -71,7 +71,7 @@ export async function POST(
       );
     }
 
-    console.log(`Starting Gemini analysis for job: ${job._id}`);
+    console.log(`Starting Grok analysis for job: ${job._id}`);
 
 const prompt = `
 You are a senior career coach and ATS (Applicant Tracking System) expert with 15 years of experience 
@@ -138,7 +138,7 @@ Analyze thoroughly and return this exact JSON:
         .trim();
       parsed = JSON.parse(cleaned);
     } catch {
-      console.error("Failed to parse Gemini response:", raw);
+      console.error("Failed to parse Grok response:", raw);
       return NextResponse.json(
         { error: "AI returned an unexpected format. Please try again." },
         { status: 500 }
@@ -148,7 +148,7 @@ Analyze thoroughly and return this exact JSON:
     // Validate matchScore is a real number
     const matchScore = Math.min(100, Math.max(0, Number(parsed.matchScore) || 0));
 
-    // ✅ Save results to DB so next call hits cache, not Gemini
+    // ✅ Save results to DB so next call hits cache, not Grok
     await Job.findByIdAndUpdate(job._id, {
       matchScore,
       whatsStrong: parsed.whatsStrong ?? "",

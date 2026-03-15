@@ -12,6 +12,9 @@ const UserSchema = new mongoose.Schema({
   resumeText: { type: String }, // Extracted text for AI
   plan: { type: String, enum: ["free", "pro"], default: "free" },
   completedOnboarding: { type: Boolean, default: true }, // true = existing users unaffected
+  atsScore: { type: Number, default: null },
+  atsLastChecked: { type: Date, default: null },
+  atsDetails: { type: Object, default: null },
 }, { timestamps: true });
 
 // Prevent overwrite on hot reload

@@ -38,6 +38,8 @@ missingKeywords: { type: [String], default: [] },
 interviewRisk:   { type: String, enum: ["low", "medium", "high"], default: "medium" },
 aiCoachTips:     { type: [String], default: [] },
 aiAnalyzedAt:    { type: Date, default: null },
+redFlagAnalysis: { type: Object, default: null },
+coldEmail:       { type: String, default: "" },
 }, { timestamps: true });
 
 // Prevent overwrite on hot reload
