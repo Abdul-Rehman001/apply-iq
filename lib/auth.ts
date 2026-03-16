@@ -35,7 +35,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const isValid = await bcrypt.compare(password, user.passwordHash);
         if (!isValid) return null;
 
-        return { id: user._id.toString(), email: user.email, name: user.name };
+        return { id: user._id.toString(), email: user.email, name: user.name, role: user.role };
       }
     })
   ],
@@ -64,6 +64,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           const dbUser = await User.findOne({ email: user.email });
           if (dbUser) {
             token.id = dbUser._id.toString();
+            token.role = dbUser.role || "user";
             token.completedOnboarding = dbUser.completedOnboarding ?? true;
           } else if (account?.provider === "credentials") {
             // This should rarely happen as authorize already checked
@@ -79,6 +80,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async session({ session, token }) {
       if (session.user && token?.id) {
         session.user.id = token.id as string;
+        (session.user as any).role = token.role as string;
         (session.user as any).completedOnboarding = token.completedOnboarding ?? true;
       }
       return session;

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 interface DashboardShellProps {
   children: React.ReactNode;
-  user?: { name?: string | null; email?: string | null; image?: string | null };
+  user?: { name?: string | null; email?: string | null; image?: string | null; role?: string | null };
 }
 
 interface SidebarStats {

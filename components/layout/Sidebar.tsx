@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -7,12 +7,12 @@ import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard, Briefcase, BarChart2, Settings, LogOut, Zap,
-  ChevronsLeft, ChevronsRight, X, Sun, Moon, Sparkles, Bell
+  ChevronsLeft, ChevronsRight, X, Sun, Moon, Sparkles, Bell, ShieldCheck
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 
 interface SidebarProps {
-  user?: { name?: string | null; email?: string | null; image?: string | null };
+  user?: { name?: string | null; email?: string | null; image?: string | null; role?: string | null };
   collapsed: boolean;
   onToggle: () => void;
   mobileOpen: boolean;
@@ -60,6 +60,9 @@ export function Sidebar({
         <span className="ml-auto w-2 h-2 rounded-full bg-red-500 shrink-0" />
       ) : null,
     },
+    ...(user?.role === "admin" || user?.email === "admin@gmail.com" ? [
+      { name: "Admin", href: "/admin", icon: ShieldCheck, badge: null }
+    ] : []),
   ];
 
   const sidebarContent = (

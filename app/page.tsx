@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { ModeToggle } from "@/components/mode-toggle";
 import { motion } from "framer-motion";
 import {
   ArrowRight, Sparkles, LayoutDashboard, FileSearch,
@@ -129,7 +128,6 @@ export default function Home() {
 
         {/* Right actions */}
         <div className="flex items-center gap-2">
-          <ModeToggle />
           <Link href="/login"
             className="hidden sm:block px-4 py-1.5 text-sm font-medium text-black/60 dark:text-white/60
             hover:text-black dark:hover:text-white transition-colors">

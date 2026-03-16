@@ -54,13 +54,13 @@ export function AICoachClient({ user, jobs }: AICoachClientProps) {
     <div className="max-w-6xl mx-auto pb-20">
       {/* Premium Header */}
       <div className="mb-10">
-        <div className="flex items-center gap-4 mb-3">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-primary-hover flex items-center justify-center shadow-lg shadow-primary/20">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-3">
+          <div className="w-12 h-12 shrink-0 rounded-2xl bg-gradient-to-br from-primary to-primary-hover flex items-center justify-center shadow-lg shadow-primary/20">
             <Sparkles className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-extrabold text-text-primary tracking-tight">AI Coach Toolkit</h1>
-            <p className="text-sm text-text-secondary font-medium italic">Your personalized AI companion for the entire job search journey</p>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">AI Coach Toolkit</h1>
+            <p className="text-xs sm:text-sm text-text-secondary font-medium italic">Your personalized AI companion for the entire job search journey</p>
           </div>
         </div>
         
@@ -169,15 +169,15 @@ function JobAnalysesTab({ jobs }: { jobs: any[] }) {
                 <p className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest mb-0.5">{job.company}</p>
                 <h3 className="text-base font-extrabold text-text-primary truncate">{job.title}</h3>
               </div>
-              <div className="flex items-center gap-6">
-                <div className="hidden sm:flex flex-col items-end">
+              <div className="flex items-center gap-3 sm:gap-6 shrink-0">
+                <div className="flex flex-col items-end">
                   <p className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest leading-none mb-1">Match</p>
-                  <p className={`text-lg font-black ${job.matchScore >= 80 ? "text-emerald-500" : job.matchScore >= 60 ? "text-amber-500" : "text-red-400"}`}>
+                  <p className={`text-sm sm:text-lg font-black ${job.matchScore >= 80 ? "text-emerald-500" : job.matchScore >= 60 ? "text-amber-500" : "text-red-400"}`}>
                     {job.matchScore || 0}%
                   </p>
                 </div>
                 <div className={`p-2 rounded-lg transition-colors ${expandedId === job._id.toString() ? "bg-primary text-white" : "bg-bg-surface-elevated text-text-tertiary group-hover:text-primary"}`}>
-                  <ChevronRight className={`w-5 h-5 transition-transform duration-300 ${expandedId === job._id.toString() ? "rotate-90" : ""}`} />
+                  <ChevronRight className={`w-4 h-4 sm:w-5 h-5 transition-transform duration-300 ${expandedId === job._id.toString() ? "rotate-90" : ""}`} />
                 </div>
               </div>
             </button>
@@ -294,9 +294,9 @@ function ResumeHealthTab({ user }: { user: any }) {
       {/* ATS Scanner Section */}
       <div className="lg:col-span-7 space-y-6">
         <div className="bg-bg-surface border border-border-subtle rounded-3xl p-8 relative overflow-hidden shadow-sm">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+              <div className="grid place-items-center w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 shrink-0">
                 <Target className="w-5 h-5" />
               </div>
               <h3 className="text-xl font-extrabold text-text-primary">ATS Compatibility Scanner</h3>
@@ -304,7 +304,7 @@ function ResumeHealthTab({ user }: { user: any }) {
             <button 
               onClick={checkATS} 
               disabled={loading}
-              className="px-5 py-2.5 bg-bg-surface-elevated hover:bg-bg-surface-hover text-xs font-bold text-text-primary border border-border-default rounded-xl transition-all flex items-center gap-2"
+              className="px-5 py-2.5 w-full sm:w-auto bg-bg-surface-elevated hover:bg-bg-surface-hover text-xs font-bold text-text-primary border border-border-default rounded-xl transition-all flex items-center justify-center gap-2"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
               {loading ? "Scanning..." : (atsDetails ? "Re-scan Resume" : "Start Initial Scan")}
@@ -326,8 +326,8 @@ function ResumeHealthTab({ user }: { user: any }) {
           ) : (
             <div className="space-y-8 animate-in fade-in duration-500">
               {/* Score Dashboard */}
-              <div className="flex items-center gap-10">
-                <div className="relative w-32 h-32 flex items-center justify-center">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8 sm:gap-10">
+                <div className="relative w-32 h-32 shrink-0 flex items-center justify-center">
                   <svg className="w-full h-full transform -rotate-90">
                     <circle cx="64" cy="64" r="58" stroke="currentColor" strokeWidth="8" className="text-border-subtle" fill="none" />
                     <circle 
@@ -344,10 +344,10 @@ function ResumeHealthTab({ user }: { user: any }) {
                     <span className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest">Score</span>
                   </div>
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 text-center sm:text-left">
                   <p className="text-xs font-bold text-text-tertiary uppercase tracking-widest mb-1">Expert Verdict</p>
                   <h4 className="text-lg font-extrabold text-text-primary leading-tight mb-2">{atsDetails.verdict}</h4>
-                  <div className="flex gap-2">
+                  <div className="flex justify-center sm:justify-start gap-2">
                     <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500`}>Keyword Density: {atsDetails.keywordDensity}</span>
                   </div>
                 </div>
@@ -529,15 +529,15 @@ function JobIntelligenceTab({ jobs, selectedJob, setJobId }: { jobs: any[], sele
           </div>
         ) : (
           <div className="bg-bg-surface border border-border-subtle rounded-3xl p-8 relative overflow-hidden shadow-sm">
-            <div className="flex items-center justify-between mb-8 pb-8 border-b border-border-subtle">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8 pb-8 border-b border-border-subtle">
               <div>
                 <p className="text-xs font-bold text-primary uppercase tracking-widest mb-1">Evaluating Opportunity</p>
                 <h3 className="text-2xl font-black text-text-primary">{selectedJob.company}</h3>
                 <p className="text-sm text-text-secondary font-medium">{selectedJob.title}</p>
               </div>
-              <div className="bg-bg-surface-elevated p-2 rounded-2xl border border-border-subtle">
+              <div className="bg-bg-surface-elevated p-2 rounded-2xl border border-border-subtle w-full sm:w-auto">
                  {analysis ? (
-                   <div className="flex items-center gap-2 px-4 py-2 bg-bg-base rounded-xl border border-border-default">
+                   <div className="flex items-center justify-center gap-2 px-4 py-2 bg-bg-base rounded-xl border border-border-default">
                      <div className={`w-3 h-3 rounded-full ${analysis.overallRating === 'safe' ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : analysis.overallRating === 'caution' ? 'bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]' : 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]'}`} />
                      <span className="text-xs font-black uppercase text-text-primary">{analysis.overallRating} Rating</span>
                    </div>
@@ -545,7 +545,7 @@ function JobIntelligenceTab({ jobs, selectedJob, setJobId }: { jobs: any[], sele
                    <button 
                     onClick={analyzeRedFlags} 
                     disabled={loading || !selectedJob.jobDescription}
-                    className="bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded-xl text-xs font-bold shadow-lg shadow-primary/20 flex items-center gap-2 transition-all disabled:opacity-50"
+                    className="bg-primary hover:bg-primary-hover text-white px-6 py-2.5 w-full rounded-xl text-xs font-bold shadow-lg shadow-primary/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
                    >
                      {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                      Perform Deep Scan
@@ -719,9 +719,9 @@ function OutreachTab({ jobs, selectedJob, setJobId }: { jobs: any[], selectedJob
           </div>
         ) : (
           <div className="bg-bg-surface border border-border-subtle rounded-3xl p-8 shadow-sm">
-             <div className="flex items-center justify-between mb-10 pb-6 border-b border-border-subtle">
+             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10 pb-6 border-b border-border-subtle">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
                     <Mail className="w-5 h-5" />
                   </div>
                   <div>
@@ -730,7 +730,7 @@ function OutreachTab({ jobs, selectedJob, setJobId }: { jobs: any[], selectedJob
                   </div>
                 </div>
                 {email && (
-                  <button onClick={generateEmail} disabled={generating} className="text-xs font-bold text-primary hover:text-primary-hover flex items-center gap-1.5 transition-all">
+                  <button onClick={generateEmail} disabled={generating} className="text-xs font-bold text-primary hover:text-primary-hover flex items-center justify-center gap-1.5 transition-all w-full sm:w-auto p-2 bg-primary/5 sm:bg-transparent rounded-lg">
                      <RefreshCw className={`w-3.5 h-3.5 ${generating ? 'animate-spin' : ''}`} /> 
                      {generating ? 'Regenerating...' : 'Regenerate'}
                   </button>

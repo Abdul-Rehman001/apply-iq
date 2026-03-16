@@ -1,4 +1,4 @@
-﻿import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import dbConnect from "@/lib/mongodb";
 import { Job } from "@/models/Job";
 import mongoose from "mongoose";
@@ -165,11 +165,28 @@ export default async function AnalyticsPage() {
                <span className="text-xs font-bold text-[#13101d] relative z-10 overflow-hidden whitespace-nowrap">{data?.offer} Offers</span>
             </div>
             
-            <div className="flex justify-between mt-3 text-[10px] font-bold text-text-tertiary px-1 uppercase tracking-wider relative">
-               <span>100%</span>
-               <span className="absolute" style={{left: `calc(max(30%, ${data?.appliedWidth}))`}}>{data?.cvRate}% CV Rate</span>
-               <span className="absolute" style={{left: `calc(max(60%, ${data?.interviewWidth}))`}}>{data?.intRate}% Int. Rate</span>
-               <span className="absolute right-0">{data?.successRate}% Success</span>
+            {/* Desktop funnel metrics */}
+            <div className="hidden sm:flex justify-between mt-3 text-[10px] font-bold text-text-tertiary px-1 uppercase tracking-wider relative h-10">
+               <span className="shrink-0">100% Total</span>
+               <span className="absolute transform -translate-x-1/2" style={{left: data?.appliedWidth}}>{data?.cvRate}% CV Rate</span>
+               <span className="absolute transform -translate-x-1/2" style={{left: data?.interviewWidth}}>{data?.intRate}% Int. Rate</span>
+               <span className="shrink-0">{data?.successRate}% Success</span>
+            </div>
+
+            {/* Mobile funnel metrics - Stacked for readability */}
+            <div className="flex sm:hidden flex-wrap gap-x-4 gap-y-2 mt-4 text-[10px] font-bold text-text-tertiary uppercase tracking-wider p-2 bg-bg-surface-elevated rounded-lg border border-border-subtle">
+               <div className="flex items-center gap-1.5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary/40" />
+                  <span>{data?.cvRate}% CV Rate</span>
+               </div>
+               <div className="flex items-center gap-1.5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+                  <span>{data?.intRate}% Int. Rate</span>
+               </div>
+               <div className="flex items-center gap-1.5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                  <span>{data?.successRate}% Success</span>
+               </div>
             </div>
          </div>
       </div>

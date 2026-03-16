@@ -11,6 +11,7 @@ const UserSchema = new mongoose.Schema({
   resumeUrl: { type: String },
   resumeText: { type: String }, // Extracted text for AI
   plan: { type: String, enum: ["free", "pro"], default: "free" },
+  role: { type: String, enum: ["user", "admin"], default: "user" },
   completedOnboarding: { type: Boolean, default: true }, // true = existing users unaffected
   atsScore: { type: Number, default: null },
   atsLastChecked: { type: Date, default: null },
