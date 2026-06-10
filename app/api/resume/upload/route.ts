@@ -20,13 +20,17 @@ export async function POST(req: Request) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
+    const isPdf = file.name.toLowerCase().endsWith(".pdf");
+
     // Upload to Cloudinary
-    const uploadResult = await new Promise<any>((resolve, reject) => {
+    // PDFs must use resource_type "raw" — "auto" defaults them to "image"
+    // which produces /image/upload/ URLs that browsers refuse to display as PDF.
+    const uploadResult = await new Promise<{secure_url: string; public_id: string}>((resolve, reject) => {
       cloudinary.uploader.upload_stream(
-        { resource_type: "auto", folder: "applyiq_resumes" },
+        { resource_type: isPdf ? "raw" : "auto", folder: "applyiq_resumes" },
         (error, result) => {
            if (error) reject(error);
-           else resolve(result);
+           else resolve(result as {secure_url: string; public_id: string});
         }
       ).end(buffer);
     });

@@ -6,8 +6,9 @@ import { Job } from "@/models/Job";
 import { Board } from "@/components/board/Board";
 import { JobList } from "@/components/jobs/JobList";
 import { Plus } from "lucide-react";
-
 import { User } from "@/models/User";
+
+export const revalidate = 30;
 
 async function getJobsAndUser(userId: string) {
   await dbConnect();

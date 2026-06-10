@@ -9,7 +9,7 @@ const client = new Groq({
 // llama-3.1-8b-instant = faster, lighter alternative
 const modelId = process.env.GROQ_MODEL ?? "llama-3.3-70b-versatile";
 
-console.log("Groq ready — model:", modelId);
+
 
 const maxRetries = 3;
 
@@ -18,7 +18,7 @@ export async function generateContent(prompt: string): Promise<string> {
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`Groq attempt ${attempt + 1}/${maxRetries + 1}`);
+     
 
       const response = await client.chat.completions.create({
         model: modelId,
@@ -28,7 +28,7 @@ export async function generateContent(prompt: string): Promise<string> {
       });
 
       const text = response.choices[0]?.message?.content ?? "";
-      console.log("✅ Groq success");
+      
       return text;
 
     } catch (error: unknown) {

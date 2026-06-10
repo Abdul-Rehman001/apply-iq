@@ -5,6 +5,8 @@ import { Job } from "@/models/Job";
 import { User } from "@/models/User";
 import { AICoachClient } from "@/components/ai-coach/AICoachClient";
 
+export const revalidate = 30;
+
 async function getData(userId: string) {
   await dbConnect();
   const [jobs, user] = await Promise.all([

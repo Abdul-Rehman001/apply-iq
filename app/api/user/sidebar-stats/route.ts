@@ -21,5 +21,12 @@ export async function GET() {
 
   const hasResume = !!(user as any)?.resumeText && (user as any).resumeText.length > 50;
 
-  return NextResponse.json({ unanalyzedCount, hasResume, followUpDueCount });
+  return NextResponse.json(
+    { unanalyzedCount, hasResume, followUpDueCount },
+    {
+      headers: {
+        "Cache-Control": "public, s-maxage=30, stale-while-revalidate=59",
+      },
+    }
+  );
 }

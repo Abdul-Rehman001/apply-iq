@@ -1,16 +1,42 @@
-﻿import { AddJobModal } from "@/components/jobs/AddJobModal";
+import { AddJobModal } from "@/components/jobs/AddJobModal";
 import { cn } from "@/lib/utils";
 import { auth } from "@/lib/auth";
+import { cache } from "react";
 import dbConnect from "@/lib/mongodb";
 import { Job } from "@/models/Job";
 import { User } from "@/models/User";
 import {
-  Send, MessageSquare, CalendarDays, Flame, Plus, Briefcase,
+  Send, MessageSquare, CalendarDays, Flame, Plus,
   Bell, MoreHorizontal, CheckCircle2, Circle, ArrowRight,
-  AlertTriangle, Sparkles, CalendarCheck
+  AlertTriangle, Sparkles, CalendarCheck, Zap
 } from "lucide-react";
 import mongoose from "mongoose";
 import Link from "next/link";
+
+// Cache auth() result for the duration of this server request
+// so layout + page don't each make a separate auth call
+const getSession = cache(auth);
+
+// Revalidate cached page every 30 seconds
+export const revalidate = 30;
+
+interface BaseJob {
+  _id: string | mongoose.Types.ObjectId;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+  matchScore?: number | null;
+  followUpDate?: Date | null;
+  appliedDate?: Date | null;
+  company: string;
+  title: string;
+}
+
+interface BaseUser {
+  _id: string | mongoose.Types.ObjectId;
+  resumeText?: string;
+  completedOnboarding?: boolean;
+}
 
 async function getDashboardData(userId: string) {
   if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
@@ -24,16 +50,16 @@ async function getDashboardData(userId: string) {
   ]);
 
   const totalApplications = jobs.length;
-  const interviews = jobs.filter((j: any) => j.status === "interview").length;
-  const offers = jobs.filter((j: any) => j.status === "offer").length;
-  const appliedJobs = jobs.filter((j: any) => j.status !== "saved");
-  const responses = jobs.filter((j: any) => ["interview", "offer", "rejected"].includes(j.status));
+  const interviews = jobs.filter((j: BaseJob) => j.status === "interview").length;
+  const offers = jobs.filter((j: BaseJob) => j.status === "offer").length;
+  const appliedJobs = jobs.filter((j: BaseJob) => j.status !== "saved");
+  const responses = jobs.filter((j: BaseJob) => ["interview", "offer", "rejected"].includes(j.status));
   const responseRate = appliedJobs.length > 0
     ? Math.round((responses.length / appliedJobs.length) * 100) : 0;
     
   let streak = 0;
   if (totalApplications > 0) {
-    const uniqueDates = new Set(jobs.map((j: any) => {
+    const uniqueDates = new Set(jobs.map((j: BaseJob) => {
       const d = new Date(j.createdAt);
       return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
     }));
@@ -62,9 +88,10 @@ async function getDashboardData(userId: string) {
   const recentlyApplied = jobs.slice(0, 3);
 
   // ── Setup Checklist ──
-  const hasResume = !!(user as any)?.resumeText && (user as any).resumeText.length > 50;
+  const typedUser = user as BaseUser | null;
+  const hasResume = !!typedUser?.resumeText && typedUser.resumeText.length > 50;
   const hasJobs = totalApplications > 0;
-  const hasAnalysis = jobs.some((j: any) => j.matchScore !== null);
+  const hasAnalysis = jobs.some((j: BaseJob) => j.matchScore !== null && j.matchScore !== undefined);
   const setupItems = [
     { key: "resume", done: hasResume, label: "Upload your resume", action: "Upload in Settings", href: "/settings" },
     { key: "job", done: hasJobs, label: "Add your first job", action: "Add a job", href: "/jobs" },
@@ -78,42 +105,51 @@ async function getDashboardData(userId: string) {
   const ago7days = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
   const ago14days = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
 
-  const focusItems: any[] = [];
+  const focusItems: { type: string; job: BaseJob; label: string; action: string; href: string }[] = [];
 
   // Priority 1: Interviews this week
-  const upcomingInterviews = jobs.filter((j: any) =>
+  const upcomingInterviews = jobs.filter((j: BaseJob) =>
     j.status === "interview" && j.followUpDate && new Date(j.followUpDate) <= in7days && new Date(j.followUpDate) >= now
   );
   for (const job of upcomingInterviews.slice(0, 3 - focusItems.length)) {
-    focusItems.push({ type: "interview", job, label: "Interview coming up", action: "Prep with AI", href: `/jobs/${(job as any)._id}?tab=interview-prep` });
+    focusItems.push({ type: "interview", job, label: "Interview coming up", action: "Prep with AI", href: `/jobs/${job._id.toString()}?tab=interview-prep` });
   }
 
   // Priority 2: Overdue follow-ups
   if (focusItems.length < 3) {
-    const overdue = jobs.filter((j: any) =>
+    const overdue = jobs.filter((j: BaseJob) =>
       j.status === "applied" && j.appliedDate && new Date(j.appliedDate) < ago7days
     );
     for (const job of overdue.slice(0, 3 - focusItems.length)) {
-      focusItems.push({ type: "followup", job, label: "Follow-up overdue", action: "Send Follow-up", href: `/jobs/${(job as any)._id}?tab=notes` });
+      focusItems.push({ type: "followup", job, label: "Follow-up overdue", action: "Send Follow-up", href: `/jobs/${job._id.toString()}?tab=notes` });
     }
   }
 
   // Priority 3: Stale jobs
   if (focusItems.length < 3) {
-    const stale = jobs.filter((j: any) =>
+    const stale = jobs.filter((j: BaseJob) =>
       new Date(j.updatedAt) < ago14days && j.status !== "offer" && j.status !== "rejected"
     );
     for (const job of stale.slice(0, 3 - focusItems.length)) {
-      focusItems.push({ type: "stale", job, label: "No updates in 14+ days", action: "Update Status", href: `/jobs/${(job as any)._id}` });
+      focusItems.push({ type: "stale", job, label: "No updates in 14+ days", action: "Update Status", href: `/jobs/${job._id.toString()}` });
     }
   }
 
-  return { totalApplications, interviews, offers, responseRate, dailyStreak, recentlyApplied, setupItems: incompleteSetup, focusItems, userResumeText: (user as any)?.resumeText || "" };
+  const pipeline = {
+    saved: jobs.filter((j: BaseJob) => j.status === "saved").length,
+    applied: jobs.filter((j: BaseJob) => j.status === "applied").length,
+    interview: jobs.filter((j: BaseJob) => j.status === "interview").length,
+    offer: jobs.filter((j: BaseJob) => j.status === "offer").length,
+    rejected: jobs.filter((j: BaseJob) => j.status === "rejected").length,
+  };
+
+  return { totalApplications, interviews, offers, responseRate, dailyStreak, recentlyApplied, setupItems: incompleteSetup, focusItems, userResumeText: typedUser?.resumeText || "", pipeline };
 }
 
 export default async function DashboardPage() {
-  const session = await auth();
-  const stats = await getDashboardData((session?.user as any)?.id || "");
+  const session = await getSession();
+  const userId = session?.user && 'id' in session.user ? (session.user as { id: string }).id : "";
+  const stats = await getDashboardData(userId);
 
   const statConfig = [
     { label: "Total Applied", value: stats.totalApplications, icon: Send, color: "primary", delta: "All time" },
@@ -157,7 +193,7 @@ export default async function DashboardPage() {
             </span>
           </div>
           <div className="space-y-2.5 pl-2">
-            {stats.setupItems.map((item: any) => (
+            {stats.setupItems.map((item) => (
               <div key={item.key} className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-2.5">
                   <Circle className="w-4 h-4 text-text-tertiary shrink-0" />
@@ -179,7 +215,7 @@ export default async function DashboardPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {statConfig.map((stat) => (
           <div key={stat.label} className="bg-bg-surface border border-border-subtle p-6 rounded-2xl shadow-sm relative overflow-hidden group hover:border-border-default transition-all duration-300">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-8">
                 <div className={cn(
@@ -193,9 +229,7 @@ export default async function DashboardPage() {
                 </div>
                 <div className={cn(
                   "flex items-center gap-0.5 text-[11px] font-bold px-2 py-1 rounded-full",
-                  (stat as any).negative
-                    ? "bg-red-500/10 text-red-400 border border-red-500/20"
-                    : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                  "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                 )}>
                   {stat.delta}
                 </div>
@@ -217,7 +251,7 @@ export default async function DashboardPage() {
         <div>
           <h2 className="text-lg font-extrabold text-text-primary tracking-tight mb-4">Today&apos;s Focus</h2>
           <div className="space-y-3">
-            {stats.focusItems.map((item: any, i: number) => {
+            {stats.focusItems.map((item, i) => {
               const Icon = item.type === "interview" ? CalendarCheck
                 : item.type === "followup" ? Send
                 : AlertTriangle;
@@ -268,18 +302,51 @@ export default async function DashboardPage() {
               View all <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
-          <div className="rounded-2xl border border-border-subtle bg-bg-surface-elevated/50 p-8 sm:p-12 text-center flex flex-col items-center justify-center min-h-[280px]">
-            <div className="w-16 h-16 rounded-2xl bg-bg-surface border border-border-default flex items-center justify-center mb-4 shadow-sm">
-              <Briefcase className="h-6 w-6 text-text-tertiary" />
+            <div className="flex flex-col gap-3">
+              {[
+                { label: "Saved", value: stats.pipeline?.saved || 0, icon: Circle, color: "text-text-tertiary", border: "border-border-default hover:border-text-tertiary/50", iconBg: "bg-bg-surface-elevated border-border-default", glow: "group-hover:bg-white/5", desc: "Waiting to apply" },
+                { label: "Applied", value: stats.pipeline?.applied || 0, icon: Send, color: "text-primary", border: "border-primary/20 hover:border-primary/50", iconBg: "bg-primary/10 border-primary/20", glow: "group-hover:bg-primary/5", desc: "Awaiting response" },
+                { label: "Interview", value: stats.pipeline?.interview || 0, icon: CalendarDays, color: "text-warning", border: "border-amber-500/20 hover:border-amber-500/50", iconBg: "bg-amber-500/10 border-amber-500/20", glow: "group-hover:bg-amber-500/5", desc: "Active conversations" },
+                { label: "Offer", value: stats.pipeline?.offer || 0, icon: Zap, color: "text-emerald-500", border: "border-emerald-500/20 hover:border-emerald-500/50", iconBg: "bg-emerald-500/10 border-emerald-500/20", glow: "group-hover:bg-emerald-500/5", desc: "Successfully secured" },
+                { label: "Rejected", value: stats.pipeline?.rejected || 0, icon: AlertTriangle, color: "text-red-500", border: "border-red-500/20 hover:border-red-500/50", iconBg: "bg-red-500/10 border-red-500/20", glow: "group-hover:bg-red-500/5", desc: "Not moving forward" },
+              ].map((item) => (
+                <Link key={item.label} href="/jobs" className={cn(
+                  "block group relative overflow-hidden bg-bg-surface rounded-2xl p-4 transition-all duration-300",
+                  "border border-border-subtle hover:-translate-y-px shadow-sm",
+                  item.border.split(' ')[1] // Apply hover border
+                )}>
+                  {/* Subtle background glow on hover */}
+                  <div className={cn(
+                    "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none",
+                    item.glow
+                  )} />
+                  
+                  <div className="relative z-10 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className={cn(
+                        "w-12 h-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 duration-300 shrink-0",
+                        item.iconBg, "border"
+                      )}>
+                        <item.icon className={cn("h-5 w-5", item.color)} strokeWidth={2.5} />
+                      </div>
+                      <div>
+                        <p className="text-sm sm:text-base font-extrabold text-text-primary mb-0.5">{item.label}</p>
+                        <p className="text-xs font-medium text-text-tertiary">{item.desc}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-4">
+                      <div className="text-right">
+                        <p className={cn("text-2xl font-bold tracking-tight", item.color)}>{item.value}</p>
+                      </div>
+                      <div className="w-8 flex justify-end">
+                        <ArrowRight className="w-4 h-4 text-text-tertiary opacity-0 -translate-x-3 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
             </div>
-            <h3 className="text-base font-bold text-text-primary mb-2">Build your pipeline</h3>
-            <p className="text-sm text-text-secondary max-w-[250px] mx-auto mb-6">Track jobs across stages from Saved to Interview to Offer.</p>
-            <AddJobModal userResumeText={stats.userResumeText}>
-              <button className="px-5 py-2 rounded-xl border border-border-default text-text-primary text-sm font-semibold hover:bg-bg-surface-hover transition-colors">
-                Add a job now
-              </button>
-            </AddJobModal>
-          </div>
         </div>
 
         {/* Recent Activity */}
@@ -290,16 +357,16 @@ export default async function DashboardPage() {
               <MoreHorizontal className="h-5 w-5" />
             </button>
           </div>
-          <div className="rounded-2xl border border-border-subtle bg-bg-surface p-4 flex flex-col min-h-[280px]">
+          <div className="rounded-2xl border border-border-subtle bg-bg-surface p-4 flex flex-col min-h-70">
             {stats.recentlyApplied.length > 0 ? (
               <div className="space-y-4 flex-1">
-                {stats.recentlyApplied.map((job: any) => (
+                {stats.recentlyApplied.map((job: BaseJob) => (
                   <div key={job._id.toString()} className="flex gap-4">
                     <div className="mt-1 relative">
                       <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center z-10 relative">
                         <Send className="w-3.5 h-3.5 text-primary" />
                       </div>
-                      <div className="absolute top-8 bottom-[-16px] left-1/2 w-px bg-border-subtle transform -translate-x-1/2" />
+                      <div className="absolute top-8 -bottom-4 left-1/2 w-px bg-border-subtle transform -translate-x-1/2" />
                     </div>
                     <div className="flex-1 pb-4">
                       <p className="text-sm font-bold text-text-primary">Application Added</p>

@@ -2,6 +2,9 @@ import { auth } from "@/lib/auth";
 import dbConnect from "@/lib/mongodb";
 import { Job } from "@/models/Job";
 import mongoose from "mongoose";
+
+export const revalidate = 30;
+
 import { 
   Play, 
   Calendar,

@@ -1,4 +1,4 @@
-﻿import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { cn } from "@/lib/utils";
 import dbConnect from "@/lib/mongodb";
@@ -7,6 +7,9 @@ import { ResumeTextEditor } from "@/components/resume/ResumeTextEditor";
 import { ResumeUpload } from "@/components/resume/ResumeUpload";
 import { ResumeBanner } from "@/components/settings/ResumeBanner";
 import { ProfileForm } from "@/components/settings/ProfileForm";
+
+export const revalidate = 30;
+
 import {
   Settings as SettingsIcon,
   CreditCard,

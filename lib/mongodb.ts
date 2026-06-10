@@ -35,11 +35,13 @@ async function dbConnect() {
   if (!cached!.promise) {
     const opts = {
       bufferCommands: false,
+      maxPoolSize: 10,          // Maintain up to 10 socket connections
+      serverSelectionTimeoutMS: 5000, // Give up initial connection after 5s
+      socketTimeoutMS: 45000,   // Close sockets after 45s of inactivity
+      family: 4,                // Use IPv4, skip trying IPv6
     };
 
-    cached!.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
-      return mongoose;
-    });
+    cached!.promise = mongoose.connect(MONGODB_URI!, opts).then((m) => m);
   }
 
   try {

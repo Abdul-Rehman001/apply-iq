@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
@@ -23,9 +23,13 @@ export function ResumeTextEditor({ initialText }: ResumeTextEditorProps) {
     }
   }, [text, initialText]);
 
-  // Sync to Zustand on mount
+  // Sync to Zustand on mount or when props change
   useEffect(() => {
-    if (initialText) setResumeText(initialText);
+    if (initialText) {
+      setResumeText(initialText);
+      setText(initialText);
+      setSaved(true);
+    }
   }, [initialText, setResumeText]);
 
   const handleSave = async () => {
