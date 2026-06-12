@@ -6,9 +6,8 @@ import mongoose from "mongoose";
 import Groq from "groq-sdk";
 import { revalidatePath } from "next/cache";
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
   const session = await auth();
   if (!session || !session.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
