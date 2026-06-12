@@ -7,6 +7,7 @@ import bcrypt from "bcryptjs";
 import { authConfig } from "@/lib/auth.config";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+ trustHost: true,
   ...authConfig,
   providers: [
     Google({

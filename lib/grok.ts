@@ -1,8 +1,5 @@
 import Groq from "groq-sdk";
 
-const client = new Groq({
-  apiKey: process.env.GROQ_API_KEY ?? "",
-});
 
 // Free tier — fast and generous (14,400 req/day)
 // llama-3.3-70b-versatile = best quality on free tier
@@ -14,11 +11,15 @@ const modelId = process.env.GROQ_MODEL ?? "llama-3.3-70b-versatile";
 const maxRetries = 3;
 
 export async function generateContent(prompt: string): Promise<string> {
+  const client = new Groq({
+  apiKey: process.env.GROQ_API_KEY ?? "",
+});
   let lastError: unknown;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
      
+
 
       const response = await client.chat.completions.create({
         model: modelId,
