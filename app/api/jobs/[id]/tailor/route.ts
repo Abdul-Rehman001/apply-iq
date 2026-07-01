@@ -54,12 +54,13 @@ WHAT TO TAILOR:
 5. Keep "education" and "certifications" unchanged.
 
 CRITICAL RULES:
-1. Do NOT invent new jobs, projects, or education.
-2. DO rewrite and rephrase bullet points to better align with the JD keywords.
-3. DO add quantifiable metrics where plausible.
-4. PRESERVE the EXACT SAME JSON STRUCTURE — all keys and sections must remain.
-5. Keep the resume content realistic and single-page worthy (concise bullets).
-6. Output MUST be valid JSON only — no markdown, no explanation.
+1. ANTI-HALLUCINATION: Do NOT invent new jobs, projects, education, or skills the candidate does not have. Do NOT invent fake metrics.
+2. PROTECT ORIGINAL CONTENT: When tailoring the "objective/summary", DO NOT delete the candidate's existing core message. Only ENHANCE it by adding or weaving in the job-specific keywords.
+3. INDUSTRY AGNOSTIC: Adapt your phrasing to match the industry of the Job Description.
+4. DO rewrite and rephrase bullet points to better align with the JD keywords, but keep the underlying truth identical.
+5. PRESERVE the EXACT SAME JSON STRUCTURE — all keys and sections must remain.
+6. Keep the resume content realistic and single-page worthy (concise bullets).
+7. Output MUST be valid JSON only — no markdown, no explanation.
 
 ${improvementContext ? `\nANALYSIS FEEDBACK TO INCORPORATE:\n${improvementContext}\n` : ''}
 BASE RESUME JSON:

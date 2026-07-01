@@ -14,16 +14,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Please enter a bullet point to improve" }, { status: 400 });
     }
 
-    const prompt = `You are an expert resume writer specializing in helping software developers and tech professionals.
-Rewrite this resume bullet point into 3 stronger versions using the XYZ formula: 
+    const prompt = `You are an elite resume writer and career strategist. Your expertise spans all industries (Tech, Marketing, Finance, Sales, Healthcare, etc.).
+Rewrite this resume bullet point into 3 stronger versions using the XYZ formula (or a similar impact-driven formula appropriate for the specific industry): 
 'Accomplished [X] as measured by [Y] by doing [Z]'
 
-Rules:
-- Start each with a strong action verb (never 'Worked on', 'Helped with', 'Was responsible for')
-- Add specific metrics where possible (%, time saved, users impacted, revenue). If no real metrics given, use realistic placeholder format like [X%] to show where candidate should add their real number
-- Keep each under 20 words
-- Make them ATS-friendly with relevant tech keywords
-- Only use information from the original bullet — do not invent experience that wasn't implied
+STRICT RULES:
+- ANTI-HALLUCINATION: Only use information and skills directly implied by the original bullet. Do NOT invent tools, projects, or experiences the candidate did not mention.
+- Start each with a strong, industry-appropriate action verb.
+- Add specific metrics where possible. If no real metrics are given, use a realistic placeholder format like [Number%] or [$Amount] so the candidate can fill in their real numbers.
+- Keep each under 20 words.
+- Make them ATS-friendly.
 
 ORIGINAL BULLET:
 ${bullet}

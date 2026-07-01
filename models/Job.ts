@@ -38,6 +38,7 @@ missingKeywords: { type: [String], default: [] },
 interviewRisk:   { type: String, enum: ["low", "medium", "high"], default: "medium" },
 aiCoachTips:     { type: [String], default: [] },
 aiAnalyzedAt:    { type: Date, default: null },
+aiResumeFingerprint: { type: String, default: null }, // Tracks which resume version was used for analysis
 redFlagAnalysis: { type: Object, default: null },
 coldEmail:       { type: String, default: "" },
   // Resume Tailoring & Versioning

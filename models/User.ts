@@ -17,6 +17,7 @@ const UserSchema = new mongoose.Schema({
   atsScore: { type: Number, default: null },
   atsLastChecked: { type: Date, default: null },
   atsDetails: { type: Object, default: null },
+  atsResumeFingerprint: { type: String, default: null }, // Tracks which resume version was last scanned
 }, { timestamps: true });
 
 // Prevent overwrite on hot reload

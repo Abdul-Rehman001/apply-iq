@@ -176,7 +176,21 @@ const styles = StyleSheet.create({
   },
 });
 
-export const PDFTemplate = ({ data }: { data: any }) => {
+export const PDFTemplate = ({ data, template = "classic" }: { data: any; template?: string }) => {
+  const headings = data.headings || {};
+  const h_summary = headings.summary || "PROFESSIONAL SUMMARY";
+  const h_skills = headings.skills || "SKILLS";
+  const h_experience = headings.experience || "EXPERIENCE";
+  const h_projects = headings.projects || "PROJECTS";
+  const h_education = headings.education || "EDUCATION";
+  const h_certifications = headings.certifications || "CERTIFICATIONS";
+
+  const isModern = template === "modern";
+  const isTech = template === "tech";
+  const isCentered = template === "centered";
+
+  const accentColor = isTech ? "#0f766e" : isModern ? "#333333" : ACCENT;
+
   const basics = data.basics || {};
   const skills = data.skills || {};
   const work = (data.work || []) as any[];
@@ -189,25 +203,44 @@ export const PDFTemplate = ({ data }: { data: any }) => {
       <Page size="A4" style={styles.page}>
 
         {/* ═══ HEADER ═══ */}
-        <View style={styles.headerRow}>
-          <View style={{ flex: 1, paddingRight: 10 }}>
-            <Text style={styles.name}>{basics.name || "YOUR NAME"}</Text>
-            <Text style={[styles.headerLeft, { marginTop: 2 }]}>{basics.email || ""}</Text>
-            <Text style={[styles.title, { marginTop: 2 }]}>{basics.title || ""}</Text>
+        {isCentered ? (
+          <View style={{ marginBottom: 15, alignItems: 'center' }}>
+            <Text style={[styles.name, { fontSize: 20, color: accentColor, lineHeight: 1.2, paddingBottom: 2 }]}>{basics.name || "YOUR NAME"}</Text>
+            <Text style={[styles.title, { marginTop: 2, fontSize: 10, color: '#333', lineHeight: 1.2 }]}>{basics.title || ""}</Text>
+            
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginTop: 4, gap: 4 }}>
+              {[
+                basics.phone, 
+                basics.email, 
+                basics.location,
+                ...(basics.links || []).map((url: string) => url.replace("https://", "").replace("www.", ""))
+              ].filter(Boolean).map((item, idx, arr) => (
+                <Text key={idx} style={[styles.headerLeft, { fontSize: 8 }]}>
+                  {item} {idx < arr.length - 1 ? " | " : ""}
+                </Text>
+              ))}
+            </View>
           </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.headerRight}>
-              {[basics.phone, basics.location].filter(Boolean).join(" | ")}
-            </Text>
+        ) : isModern ? (
+          <View style={{ marginBottom: 15, alignItems: 'center', borderBottomWidth: 1.5, borderBottomColor: accentColor, paddingBottom: 10 }}>
+            <Text style={[styles.name, { fontSize: 20, color: accentColor }]}>{basics.name || "YOUR NAME"}</Text>
+            <Text style={[styles.title, { marginTop: 4, fontSize: 11, color: '#555' }]}>{basics.title || ""}</Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginTop: 4, gap: 5 }}>
+              <Text style={styles.headerLeft}>{basics.email || ""}</Text>
+              <Text style={styles.headerLeft}> | </Text>
+              <Text style={styles.headerLeft}>{basics.phone || ""}</Text>
+              <Text style={styles.headerLeft}> | </Text>
+              <Text style={styles.headerLeft}>{basics.location || ""}</Text>
+            </View>
             {basics.links && basics.links.length > 0 && (
-              <View style={{ flexDirection: 'row', justifyContent: 'flex-end', flexWrap: 'wrap', marginTop: 2 }}>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginTop: 2 }}>
                 {basics.links.map((url: string, idx: number) => {
                   if (!url) return null;
                   const isUrl = url.includes("http") || url.includes("www");
                   const label = url.replace("https://", "").replace("www.", "").split("/")[0];
                   return (
-                    <Text key={idx} style={styles.linksRight}>
-                      {isUrl ? <Link src={url} style={{ color: '#1a5276', textDecoration: 'none' }}>{label}</Link> : url}
+                    <Text key={idx} style={[styles.linksRight, { color: accentColor }]}>
+                      {isUrl ? <Link src={url} style={{ color: accentColor, textDecoration: 'none' }}>{label}</Link> : url}
                       {idx < basics.links.length - 1 ? " | " : ""}
                     </Text>
                   );
@@ -215,13 +248,41 @@ export const PDFTemplate = ({ data }: { data: any }) => {
               </View>
             )}
           </View>
-        </View>
+        ) : (
+          <View style={styles.headerRow}>
+            <View style={{ flex: 1, paddingRight: 10 }}>
+              <Text style={[styles.name, { color: accentColor }]}>{basics.name || "YOUR NAME"}</Text>
+              <Text style={[styles.headerLeft, { marginTop: 2 }]}>{basics.email || ""}</Text>
+              <Text style={[styles.title, { marginTop: 2, color: accentColor }]}>{basics.title || ""}</Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.headerRight}>
+                {[basics.phone, basics.location].filter(Boolean).join(" | ")}
+              </Text>
+              {basics.links && basics.links.length > 0 && (
+                <View style={{ flexDirection: 'row', justifyContent: 'flex-end', flexWrap: 'wrap', marginTop: 2 }}>
+                  {basics.links.map((url: string, idx: number) => {
+                    if (!url) return null;
+                    const isUrl = url.includes("http") || url.includes("www");
+                    const label = url.replace("https://", "").replace("www.", "").split("/")[0];
+                    return (
+                      <Text key={idx} style={[styles.linksRight, { color: accentColor }]}>
+                        {isUrl ? <Link src={url} style={{ color: accentColor, textDecoration: 'none' }}>{label}</Link> : url}
+                        {idx < basics.links.length - 1 ? " | " : ""}
+                      </Text>
+                    );
+                  })}
+                </View>
+              )}
+            </View>
+          </View>
+        )}
 
         {/* ═══ SUMMARY ═══ */}
         {basics.objective && (
           <View>
-            <View style={styles.divider} />
-            <Text style={styles.sectionTitle}>Professional Summary</Text>
+            {!isModern && <View style={[styles.divider, { borderBottomColor: accentColor }]} />}
+            <Text style={[styles.sectionTitle, isModern ? { borderBottomWidth: 1, borderBottomColor: '#ccc', paddingBottom: 2, marginBottom: 4 } : {}]}>{h_summary}</Text>
             <Text style={styles.objectiveText}>{basics.objective}</Text>
           </View>
         )}
@@ -229,8 +290,8 @@ export const PDFTemplate = ({ data }: { data: any }) => {
         {/* ═══ SKILLS ═══ */}
         {Object.keys(skills).length > 0 && (
           <View>
-            <View style={styles.divider} />
-            <Text style={styles.sectionTitle}>Skills</Text>
+            {!isModern && <View style={[styles.divider, { borderBottomColor: accentColor }]} />}
+            <Text style={[styles.sectionTitle, isModern ? { marginTop: 6, borderBottomWidth: 1, borderBottomColor: '#ccc', paddingBottom: 2, marginBottom: 4 } : {}]}>{h_skills}</Text>
             <View style={{ marginTop: 2 }}>
               {Object.entries(skills).map(([category, values], i) => (
                 <View key={i} style={styles.skillRow}>
@@ -245,8 +306,8 @@ export const PDFTemplate = ({ data }: { data: any }) => {
         {/* ═══ EXPERIENCE ═══ */}
         {work.length > 0 && (
           <View>
-            <View style={styles.divider} />
-            <Text style={styles.sectionTitle}>Experience</Text>
+            {!isModern && <View style={[styles.divider, { borderBottomColor: accentColor }]} />}
+            <Text style={[styles.sectionTitle, isModern ? { marginTop: 6, borderBottomWidth: 1, borderBottomColor: '#ccc', paddingBottom: 2, marginBottom: 4 } : {}]}>{h_experience}</Text>
             {work.map((job: any, idx: number) => (
               <View key={idx} style={{ marginTop: 3, marginBottom: 2 }}>
                 <View style={styles.jobHeaderRow}>
@@ -271,8 +332,8 @@ export const PDFTemplate = ({ data }: { data: any }) => {
         {/* ═══ PROJECTS ═══ */}
         {projects.length > 0 && (
           <View>
-            <View style={styles.divider} />
-            <Text style={styles.sectionTitle}>Projects</Text>
+            {!isModern && <View style={[styles.divider, { borderBottomColor: accentColor }]} />}
+            <Text style={[styles.sectionTitle, isModern ? { marginTop: 6, borderBottomWidth: 1, borderBottomColor: '#ccc', paddingBottom: 2, marginBottom: 4 } : {}]}>{h_projects}</Text>
             {projects.map((p: any, idx: number) => (
               <View key={idx} style={{ marginTop: 3, marginBottom: 2 }}>
                 <View style={styles.projectHeader}>
@@ -302,8 +363,8 @@ export const PDFTemplate = ({ data }: { data: any }) => {
         {/* ═══ EDUCATION ═══ */}
         {education.length > 0 && (
           <View>
-            <View style={styles.divider} />
-            <Text style={styles.sectionTitle}>Education</Text>
+            {!isModern && <View style={[styles.divider, { borderBottomColor: accentColor }]} />}
+            <Text style={[styles.sectionTitle, isModern ? { marginTop: 6, borderBottomWidth: 1, borderBottomColor: '#ccc', paddingBottom: 2, marginBottom: 4 } : {}]}>{h_education}</Text>
             {education.map((edu: any, idx: number) => (
               <View key={idx} style={{ marginTop: 3 }}>
                 <View style={styles.eduHeader}>
@@ -328,8 +389,8 @@ export const PDFTemplate = ({ data }: { data: any }) => {
         {/* ═══ CERTIFICATIONS ═══ */}
         {certifications.length > 0 && (
           <View>
-            <View style={styles.divider} />
-            <Text style={styles.sectionTitle}>Certifications</Text>
+            {!isModern && <View style={[styles.divider, { borderBottomColor: accentColor }]} />}
+            <Text style={[styles.sectionTitle, isModern ? { marginTop: 6, borderBottomWidth: 1, borderBottomColor: '#ccc', paddingBottom: 2, marginBottom: 4 } : {}]}>{h_certifications}</Text>
             {certifications.map((cert: any, idx: number) => (
               <Text key={idx} style={styles.certText}>
                 {cert.name} {cert.year ? `| ${cert.year}` : ''}
