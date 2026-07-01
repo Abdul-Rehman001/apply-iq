@@ -99,6 +99,7 @@ export function ResumeTailorModal({ job, open, onClose }: ResumeTailorModalProps
 
   const templates = [
     { id: "classic", name: "Classic Professional" },
+    { id: "centered", name: "Centered (New)" },
     { id: "modern", name: "Modern Minimal" },
     { id: "tech", name: "Tech Startup" },
   ];
@@ -150,7 +151,7 @@ export function ResumeTailorModal({ job, open, onClose }: ResumeTailorModalProps
         {/* Body Split View */}
         <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
           {/* Left Panel: Editor */}
-          <div className="w-full lg:w-1/3 lg:min-w-100 border-b lg:border-b-0 lg:border-r border-border-subtle bg-bg-surface-hover/50 flex flex-col overflow-hidden max-h-[50vh] lg:max-h-full">
+          <div className="w-full lg:w-1/2 lg:min-w-100 border-b lg:border-b-0 lg:border-r border-border-subtle bg-bg-surface-hover/50 flex flex-col overflow-hidden max-h-[50vh] lg:max-h-full">
             {loading ? (
               <div className="flex-1 flex flex-col items-center justify-center text-text-secondary">
                 <Loader2 className="w-10 h-10 animate-spin text-primary mb-4" />
@@ -229,6 +230,36 @@ export function ResumeTailorModal({ job, open, onClose }: ResumeTailorModalProps
 
                 <hr className="border-border-subtle" />
 
+                {/* Section Headings Customizer */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-bold text-text-primary">Section Titles</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    {['summary', 'skills', 'experience', 'projects', 'education'].map((key) => {
+                      const labels: Record<string, string> = {
+                        summary: "Summary", skills: "Skills", experience: "Experience", projects: "Projects", education: "Education"
+                      };
+                      return (
+                        <div key={key} className="space-y-1">
+                          <label className="text-xs font-bold text-text-secondary">{labels[key]}</label>
+                          <input 
+                            type="text"
+                            className="w-full bg-bg-surface border border-border-default rounded-xl px-4 py-2 text-sm text-text-primary focus:outline-none focus:border-primary"
+                            value={resumeData.headings?.[key] || labels[key].toUpperCase()}
+                            onChange={(e) => {
+                              setResumeData({
+                                ...resumeData,
+                                headings: { ...(resumeData.headings || {}), [key]: e.target.value.toUpperCase() }
+                              });
+                            }}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <hr className="border-border-subtle" />
+
                 <div className="space-y-4">
                   <h3 className="text-sm font-bold text-text-primary">Project Links</h3>
                   {resumeData.projects?.map((project: any, idx: number) => (
@@ -284,16 +315,16 @@ export function ResumeTailorModal({ job, open, onClose }: ResumeTailorModalProps
           </div>
 
           {/* Right Panel: Live PDF Preview */}
-          <div className="flex-1 bg-gray-100 p-4">
+          <div className="w-full lg:w-1/2 bg-gray-100 dark:bg-black/20 p-4">
             {loading ? (
-              <div className="w-full h-full bg-white rounded-xl border shadow-sm animate-pulse flex items-center justify-center text-gray-400 font-bold">
+              <div className="w-full h-full bg-white dark:bg-bg-surface rounded-xl border border-border-default shadow-sm animate-pulse flex items-center justify-center text-text-tertiary font-bold">
                 Preparing PDF Engine...
               </div>
             ) : resumeData ? (
-              <div className="w-full h-full rounded-xl overflow-hidden shadow-2xl border border-gray-300">
-                {/* Dynamically render the template based on selection later, for now just PDFTemplate */}
-                <PDFViewer width="100%" height="100%" className="border-none">
-                  <PDFTemplate data={resumeData} />
+              <div className="w-full h-full rounded-xl overflow-hidden shadow-2xl border border-gray-300 dark:border-border-default">
+                {/* Dynamically render the template based on selection */}
+                <PDFViewer key={activeTemplate} width="100%" height="100%" className="border-none">
+                  <PDFTemplate data={resumeData} template={activeTemplate} />
                 </PDFViewer>
               </div>
             ) : null}

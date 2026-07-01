@@ -26,13 +26,36 @@ export async function POST(
       return NextResponse.json({ error: "Job not found" }, { status: 404 });
     }
 
-    // ✅ Cache check — if already analyzed and data hasn't changed, return cached
-    // This prevents re-calling Grok on every click and burning through quota
+    // Check if a force re-analyze was requested (e.g., user explicitly clicked re-analyze)
+    let forceReanalyze = false;
+    try {
+      const body = await req.json();
+      forceReanalyze = body?.force === true;
+    } catch {
+      // No body or invalid JSON — that's fine, default to non-forced
+    }
+
+    // Get the user's current resume to check if it changed since last analysis
+    const { User } = await import("@/models/User");
+    const user = await User.findById(session.user.id);
+    const resumeText = user?.resumeText ?? "";
+
+    // Build a fingerprint of the current resume for comparison
+    const currentResumeFingerprint = `${resumeText.length}:${resumeText.slice(0, 200)}`;
+
+    // ✅ Cache check — return cached ONLY if:
+    // 1. Not a forced re-analyze
+    // 2. Job was previously analyzed
+    // 3. Resume has NOT changed since the last analysis
+    const resumeUnchanged = job.aiResumeFingerprint === currentResumeFingerprint;
+
     if (
+      !forceReanalyze &&
       job.matchScore !== null &&
       job.matchScore !== undefined &&
       job.aiCoachTips?.length > 0 &&
-      job.aiAnalyzedAt // timestamp of last analysis
+      job.aiAnalyzedAt &&
+      resumeUnchanged
     ) {
       console.log(`Returning cached AI analysis for job: ${job._id}`);
       return NextResponse.json({
@@ -56,10 +79,7 @@ export async function POST(
       );
     }
 
-    // Get resume text from user profile
-    const { User } = await import("@/models/User");
-    const user = await User.findById(session.user.id);
-    const resumeText = user?.resumeText ?? "";
+    // Resume text was already fetched above for the cache check
 
     if (!resumeText || resumeText.trim().length < 50) {
       return NextResponse.json(
@@ -149,6 +169,7 @@ Analyze thoroughly and return this exact JSON:
     const matchScore = Math.min(100, Math.max(0, Number(parsed.matchScore) || 0));
 
     // ✅ Save results to DB so next call hits cache, not Grok
+    // Also save the resume fingerprint so we know which resume version was analyzed
     await Job.findByIdAndUpdate(job._id, {
       matchScore,
       whatsStrong: parsed.whatsStrong ?? "",
@@ -158,7 +179,8 @@ Analyze thoroughly and return this exact JSON:
       missingKeywords: parsed.missingKeywords ?? [],
       interviewRisk: parsed.interviewRisk ?? "medium",
       aiCoachTips: parsed.aiCoachTips ?? [],
-      aiAnalyzedAt: new Date(), // timestamp for cache invalidation
+      aiAnalyzedAt: new Date(),
+      aiResumeFingerprint: currentResumeFingerprint,
     });
 
     console.log(`AI analysis complete for job: ${job._id}, score: ${matchScore}`);

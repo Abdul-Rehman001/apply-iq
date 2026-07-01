@@ -23,24 +23,37 @@ export async function POST() {
       return NextResponse.json({ error: "Add your resume text first (min 100 chars)" }, { status: 400 });
     }
 
-    // Check cache (7 days)
+    // Build a simple fingerprint of the current resume text
+    // so we can detect when the resume has changed since the last scan
+    const resumeFingerprint = `${user.resumeText.length}:${user.resumeText.slice(0, 200)}`;
+
+    // Check cache — only use cached result if:
+    // 1. Scan was done within 7 days AND
+    // 2. Resume text has NOT changed since that scan
     const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
-    if (user.atsLastChecked && (Date.now() - new Date(user.atsLastChecked).getTime() < SEVEN_DAYS_MS)) {
-      if (user.atsDetails) {
-        return NextResponse.json(user.atsDetails);
-      }
+    const cacheIsRecent = user.atsLastChecked && (Date.now() - new Date(user.atsLastChecked).getTime() < SEVEN_DAYS_MS);
+    const resumeUnchanged = user.atsResumeFingerprint === resumeFingerprint;
+
+    if (cacheIsRecent && resumeUnchanged && user.atsDetails) {
+      return NextResponse.json({ ...user.atsDetails, cached: true });
     }
 
-    const prompt = `You are an expert ATS (Applicant Tracking System) consultant. Analyze this resume for ATS compatibility.
-ATS systems parse resumes automatically — formatting issues, missing sections, and poor keyword density cause good candidates to be filtered out.
+    const prompt = `You are an elite ATS (Applicant Tracking System) parser and Senior Recruiter. Analyze this resume for ATS compatibility. Your analysis must apply universally across all industries (Tech, Marketing, Finance, Healthcare, Business, etc.).
 
-RESUME:
+CRITICAL DIRECTIVES:
+1. ANTI-HALLUCINATION: Do NOT invent errors. If the resume is well-formatted, it is expected and perfectly fine to return empty arrays [] for formatIssues and missingSections. Do not flag things just to have something to flag.
+2. INDUSTRY AGNOSTIC: Recognize that different industries have different standard sections (e.g., "Projects" for Tech, "Publications" for Academia, "Campaigns" for Marketing). All are valid.
+3. FORMAT TOLERANCE: Bullet points (•, -, *, ·) and pipes (|) are perfectly standard and are NOT special characters. Do NOT flag them.
+4. TITLES & HEADERS: If a professional title (e.g., "Software Engineer", "Marketing Manager", "Financial Analyst") appears near the top, recognize it. It does NOT need a literal "Title:" label.
+5. PENALTIES: Only penalize for genuine ATS parsing threats: complex tables, missing contact info, giant walls of text without bullets, or missing core timelines in experience.
+
+RESUME TEXT:
 ${user.resumeText}
 
-Return ONLY valid JSON, no markdown, no explanation:
+Return ONLY valid JSON. No markdown backticks, no explanations.
 {
-  "atsScore": <integer 0-100>,
-  "verdict": "<one sentence overall assessment>",
+  "atsScore": <integer 0-100. Give 90+ if structurally sound, regardless of industry.>,
+  "verdict": "<One clear sentence assessing overall ATS readability>",
   "sectionScores": {
     "contact": <0-100>,
     "summary": <0-100>,
@@ -49,21 +62,17 @@ Return ONLY valid JSON, no markdown, no explanation:
     "education": <0-100>
   },
   "formatIssues": [
-    "<specific issue found, e.g. 'Using tables which ATS cannot parse'>"
+    "<Only list GENUINE ATS parsing blockers (e.g., missing dates, no clear headings). Return [] if none>"
   ],
   "missingSections": [
-    "<section name that is absent or weak>"
+    "<Only list TRULY missing core sections. Return [] if none>"
   ],
   "keywordDensity": "<low | medium | high>",
   "topRecommendations": [
-    "<specific actionable fix 1>",
-    "<specific actionable fix 2>",
-    "<specific actionable fix 3>",
-    "<specific actionable fix 4>",
-    "<specific actionable fix 5>"
+    "<1-5 specific, actionable fixes. If perfect, suggest minor strategic optimizations>"
   ],
   "quickWins": [
-    "<change that takes under 5 minutes to implement>"
+    "<1-2 changes taking under 5 minutes to implement>"
   ]
 }`;
 
@@ -79,10 +88,11 @@ Return ONLY valid JSON, no markdown, no explanation:
     
     const atsDetails = JSON.parse(cleanJson);
     
-    // Update user record
+    // Update user record with results AND the fingerprint of the resume that was scanned
     user.atsScore = atsDetails.atsScore;
     user.atsLastChecked = new Date();
     user.atsDetails = atsDetails;
+    user.atsResumeFingerprint = resumeFingerprint;
     await user.save();
 
     return NextResponse.json(atsDetails);

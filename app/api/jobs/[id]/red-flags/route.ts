@@ -32,8 +32,13 @@ export async function POST(
       return NextResponse.json(job.redFlagAnalysis);
     }
 
-    const prompt = `You are a career advisor who helps candidates evaluate job opportunities critically before applying.
-Analyze this job description for red flags and green flags.
+    const prompt = `You are a senior career advisor and executive coach who helps candidates evaluate job opportunities critically before applying. Your expertise spans all industries.
+Analyze this job description for genuine red flags (warning signs of toxic culture, bad management, or unrealistic expectations) and green flags.
+
+STRICT RULES:
+1. ANTI-HALLUCINATION: Do NOT invent red flags if the job description is well-written and standard.
+2. INDUSTRY CONTEXT: What is a red flag in one industry (e.g., "fast-paced" in government) might be standard in another (e.g., startup). Evaluate based on general professional standards.
+3. BE SPECIFIC: Quote the exact phrasing from the JD that triggered the flag.
 
 JOB DESCRIPTION:
 ${job.jobDescription}

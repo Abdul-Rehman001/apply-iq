@@ -62,17 +62,17 @@ export async function POST(
     console.log(`Generating AI Cover Letter for job: ${job._id}`);
 
     const prompt = `
-Write a professional, compelling cover letter for this job application.
-Use only skills and experiences from the resume provided.
+Write a professional, compelling cover letter for this job application. You are an expert career coach helping candidates across all industries (Tech, Business, Healthcare, Arts, etc.).
 
 STRICT INSTRUCTIONS:
-- Structure: 3 paragraphs formatting perfectly with line breaks.
-- Para 1: Strong opening hook — lead with the most relevant experience, do NOT start with 'I am writing to apply'.
-- Para 2: Specific achievements and skills that match the JD requirements. Use the "What's Strong" and "Success Strategy" context if provided.
-- Para 3: Brief closing with enthusiasm and clear CTA.
-- Tone: confident, specific, human — not corporate or generic.
+- ANTI-HALLUCINATION: Use ONLY skills, experiences, and tools explicitly mentioned in the RESUME. Do NOT invent or assume any experience, even if the Job Description asks for it.
+- Structure: 3 paragraphs formatted perfectly with line breaks.
+- Para 1: Strong opening hook — lead with the most relevant experience. Do NOT start with 'I am writing to apply'.
+- Para 2: Specific achievements and skills from the resume that directly match the JD requirements. Use the "What's Strong" and "Success Strategy" context if provided.
+- Para 3: Brief closing with enthusiasm and a clear Call To Action.
+- Tone: Confident, specific, human — adapt the tone slightly based on the industry (e.g., more formal for finance, more dynamic for startups).
 - Length: 250-320 words maximum.
-- Return ONLY the cover letter body text, no subject line, no placeholders like [Your Name], no JSON, no markdown formatting blocks. Just the plain text paragraphs separated by empty lines.
+- Return ONLY the cover letter body text. No subject line, no placeholders like [Your Name], no JSON, no markdown formatting blocks. Just the plain text paragraphs separated by empty lines.
 
 CONTEXT:
 What's Strong in Candidate: ${job.whatsStrong || "Not specified."}
