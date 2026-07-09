@@ -9,7 +9,7 @@ const geist = Geist({ subsets: ['latin'], variable: '--font-geist' });
 const satisfy = Satisfy({ weight: '400', subsets: ['latin'], variable: '--font-satisfy' });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://raptim.com'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://raptim.vercel.app'),
   title: {
     default: "Raptim - AI Job Tracker & Career Coach",
     template: "%s | Raptim"
