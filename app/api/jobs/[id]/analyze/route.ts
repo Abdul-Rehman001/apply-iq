@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import dbConnect from "@/lib/mongodb";
 import { Job } from "@/models/Job";
-import { generateContent } from "@/lib/grok";
+import { generateContentWithUsage } from "@/lib/grok";
 import { z } from "zod";
 import { mightBeGrounded } from "@/lib/groundingCheck";
 
@@ -20,11 +20,11 @@ const analysisSchema = z.object({
 
 async function getValidatedAnalysis(prompt: string, maxRetries = 1) {
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    const raw = await generateContent(prompt);
+    const { text: raw, usage } = await generateContentWithUsage(prompt);
     const cleaned = raw.replace(/```json/gi, "").replace(/```/g, "").trim();
     try {
       const json = JSON.parse(cleaned);
-      return analysisSchema.parse(json);
+      return { analysis: analysisSchema.parse(json), usage };
     } catch (err) {
       if (attempt === maxRetries) throw err;
       console.warn(`Analysis parse/validation failed, retrying (attempt ${attempt + 1})`);
@@ -170,8 +170,11 @@ Analyze thoroughly and return this exact JSON:
 `.trim();
 
     let parsed;
+    let tokenUsage = 0;
     try {
-      parsed = await getValidatedAnalysis(prompt);
+      const result = await getValidatedAnalysis(prompt);
+      parsed = result.analysis;
+      tokenUsage = result.usage?.total_tokens || 0;
     } catch (error) {
       console.error("Failed to parse/validate Grok response:", error);
       return NextResponse.json(
@@ -207,6 +210,14 @@ Analyze thoroughly and return this exact JSON:
       aiCoachTips: parsed.aiCoachTips ?? [],
       aiAnalyzedAt: new Date(),
       aiResumeFingerprint: currentResumeFingerprint,
+    });
+
+    // ✅ Track API Usage for Admin Dashboard
+    await User.findByIdAndUpdate(session.user.id, {
+      $inc: { 
+        totalAiTokens: tokenUsage, 
+        totalAiCalls: 1 
+      }
     });
 
     console.log(`AI analysis complete for job: ${job._id}, score: ${matchScore}`);

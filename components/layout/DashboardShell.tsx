@@ -23,7 +23,7 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
   const [stats, setStats] = useState<SidebarStats>({ unanalyzedCount: 0, hasResume: true, followUpDueCount: 0 });
 
   useEffect(() => {
-    fetch("/api/user/sidebar-stats")
+    fetch(`/api/user/sidebar-stats?t=${Date.now()}`, { cache: "no-store" })
       .then((r) => r.json())
       .then((data) => setStats(data))
       .catch(() => {}); // non-critical — badges just won't show

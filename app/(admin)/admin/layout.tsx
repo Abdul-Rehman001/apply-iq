@@ -10,8 +10,15 @@ export default async function AdminLayout({
 }) {
   const session = await auth();
   
-  if (!session?.user || (session.user.role !== "admin" && session.user.email !== "admin@gmail.com")) {
+  if (!session?.user) {
     redirect("/");
+  }
+
+  // Strictly enforce admin role or the specific master admin email
+  const isAuthorized = session.user.role === "admin" || session.user.email === "admin@applyiq.com";
+  
+  if (!isAuthorized) {
+    redirect("/dashboard"); // Kick normal users back to their dashboard
   }
 
   return (

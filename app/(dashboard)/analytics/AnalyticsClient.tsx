@@ -166,20 +166,17 @@ export function AnalyticsClient({ jobs: allJobs }: { jobs: IJob[] }) {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+      {/* Header & Filters */}
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 xl:gap-6 mb-8">
         <div>
           <h1 className="text-2xl font-semibold text-text-primary tracking-tight">Analytics Overview</h1>
           <p className="text-text-secondary mt-1 font-medium">Track your application performance and conversion funnel</p>
         </div>
-      </div>
 
-      {/* Filters Bar */}
-      <div className="flex flex-wrap items-center gap-3 p-4 rounded-lg bg-bg-surface border border-border-subtle shadow-sm">
-        {/* Time filter */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
-          <span className="text-[10px] font-semibold text-text-tertiary uppercase tracking-wider mb-1 sm:mb-0">Period</span>
-          <div className="flex flex-wrap gap-1">
+        {/* Compact Filters Menu */}
+        <div className="flex flex-wrap sm:flex-nowrap items-center gap-1 sm:gap-2 bg-bg-surface border border-border-subtle p-1 rounded-md shadow-sm self-start w-full xl:w-auto">
+          {/* Time filter */}
+          <div className="flex items-center shrink-0 w-full sm:w-auto overflow-x-auto no-scrollbar pb-1 sm:pb-0">
             {timeRanges.map((t) => (
               <button
                 key={t.id}
@@ -194,32 +191,29 @@ export function AnalyticsClient({ jobs: allJobs }: { jobs: IJob[] }) {
               </button>
             ))}
           </div>
-        </div>
 
-        <div className="w-px h-6 bg-border-subtle hidden sm:block" />
+          <div className="w-px h-5 bg-border-subtle shrink-0 hidden sm:block mx-1" />
 
-        {/* Platform filter */}
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] font-semibold text-text-tertiary uppercase tracking-wider">Platform</span>
-          <div className="w-[180px]">
+          {/* Platform filter */}
+          <div className="shrink-0 w-full sm:w-[150px]">
             <Dropdown
               value={platformFilter}
               onChange={setPlatformFilter}
               options={[
                 { 
                   value: "all", 
-                  label: <div className="flex justify-between items-center w-full"><span className="flex items-center gap-2"><Globe className="w-3.5 h-3.5 text-text-tertiary" /> All Platforms</span><span className="text-[10px] bg-bg-surface-elevated px-1.5 py-0.5 rounded-full border border-border-subtle">{allJobs.length}</span></div> 
+                  label: <div className="flex justify-between items-center w-full"><span className="flex items-center gap-2"><Globe className="w-3.5 h-3.5 text-text-tertiary shrink-0" /> <span className="truncate">All</span></span><span className="text-[10px] text-text-tertiary font-bold ml-2 shrink-0">({allJobs.length})</span></div> 
                 },
                 { 
                   value: "none", 
-                  label: <div className="flex justify-between items-center w-full"><span className="flex items-center gap-2"><Globe className="w-3.5 h-3.5 text-text-tertiary" /> No Platform</span><span className="text-[10px] bg-bg-surface-elevated px-1.5 py-0.5 rounded-full border border-border-subtle">{platformCounts["none"] || 0}</span></div> 
+                  label: <div className="flex justify-between items-center w-full"><span className="flex items-center gap-2"><Globe className="w-3.5 h-3.5 text-text-tertiary shrink-0" /> <span className="truncate">None</span></span><span className="text-[10px] text-text-tertiary font-bold ml-2 shrink-0">({platformCounts["none"] || 0})</span></div> 
                 },
                 { value: "divider", label: "" },
                 ...platforms.map(p => ({
                   value: p,
                   label: (
                     <div className="flex justify-between items-center w-full">
-                      <span className="flex items-center gap-2 truncate max-w-[100px]">
+                      <span className="flex items-center gap-2 truncate pr-2">
                         {getPlatformIcon(p) ? (
                           /* eslint-disable-next-line @next/next/no-img-element */
                           <img src={getPlatformIcon(p)!} alt="" className="w-3.5 h-3.5 rounded-sm shrink-0" />
@@ -228,8 +222,8 @@ export function AnalyticsClient({ jobs: allJobs }: { jobs: IJob[] }) {
                         )}
                         <span className="truncate">{p}</span>
                       </span>
-                      <span className="text-[10px] bg-bg-surface-elevated px-1.5 py-0.5 rounded-full border border-border-subtle shrink-0">
-                        {platformCounts[p] || 0}
+                      <span className="text-[10px] text-text-tertiary font-bold shrink-0">
+                        ({platformCounts[p] || 0})
                       </span>
                     </div>
                   )
@@ -237,21 +231,17 @@ export function AnalyticsClient({ jobs: allJobs }: { jobs: IJob[] }) {
               ]}
             />
           </div>
-        </div>
 
-        {activeFilterCount > 0 && (
-          <div className="flex items-center gap-2 ml-auto">
-            <span className="text-xs text-primary font-semibold">
-              {total} of {allJobs.length} jobs shown
-            </span>
+          {/* Clear Button (Always takes space to prevent layout shifts, but hidden when inactive) */}
+          <div className={`flex items-center shrink-0 pl-1 sm:border-l border-border-subtle sm:ml-1 transition-opacity duration-200 ${activeFilterCount > 0 ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
             <button
               onClick={() => { setTimeRange("all"); setPlatformFilter("all"); }}
-              className="text-xs font-semibold text-red-400 hover:text-red-300 transition-colors"
+              className="text-xs font-semibold text-text-tertiary hover:text-red-400 transition-colors px-3 py-1.5 whitespace-nowrap rounded-md hover:bg-red-500/10 w-full sm:w-auto"
             >
               Clear
             </button>
           </div>
-        )}
+        </div>
       </div>
 
       {/* Top Stats */}
@@ -342,9 +332,9 @@ export function AnalyticsClient({ jobs: allJobs }: { jobs: IJob[] }) {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Application Heatmap */}
-        <div className="bg-bg-surface border border-border-subtle p-6 rounded-lg shadow-sm flex flex-col justify-between">
-           <h3 className="text-base font-semibold text-text-primary mb-4">90-Day Activity Heatmap</h3>
-           <div className="w-full flex-1 flex flex-col justify-end">
+        <div className="bg-bg-surface border border-border-subtle p-6 rounded-lg shadow-sm flex flex-col">
+           <h3 className="text-base font-semibold text-text-primary mb-6">90-Day Activity Heatmap</h3>
+           <div className="w-full flex-1 flex flex-col">
              <div className="grid grid-cols-[repeat(13,_1fr)] gap-1 mb-2">
                {heatmapDays.map((day, i) => (
                  <div 
@@ -369,9 +359,9 @@ export function AnalyticsClient({ jobs: allJobs }: { jobs: IJob[] }) {
         </div>
 
         {/* 12-Week Trend Graph */}
-        <div className="bg-bg-surface border border-border-subtle p-6 rounded-lg flex flex-col justify-between shadow-sm">
-           <h3 className="text-base font-semibold text-text-primary mb-4">12-Week Trend</h3>
-           <div className="flex-1 flex flex-col justify-end">
+        <div className="bg-bg-surface border border-border-subtle p-6 rounded-lg flex flex-col shadow-sm">
+           <h3 className="text-base font-semibold text-text-primary mb-6">12-Week Trend</h3>
+           <div className="flex-1 flex flex-col">
               <div className="h-32 w-full border-b border-border-subtle pb-2 relative flex items-end justify-between">
                 {weeklyTrendData.map((d, i) => {
                   const heightPct = (d.count / maxWeeklyCount) * 100;
@@ -397,15 +387,17 @@ export function AnalyticsClient({ jobs: allJobs }: { jobs: IJob[] }) {
         </div>
 
         {/* Platform Distribution */}
-        <div className="bg-bg-surface border border-border-subtle p-6 rounded-lg shadow-sm">
-          <div className="flex items-center justify-between mb-6">
+        <div className="bg-bg-surface border border-border-subtle p-6 rounded-lg shadow-sm flex flex-col h-full">
+          <div className="flex items-center justify-between mb-6 shrink-0">
             <h3 className="text-base font-semibold text-text-primary">Platform Distribution</h3>
             <Globe className="w-4 h-4 text-text-tertiary" />
           </div>
           {platformBreakdown.length === 0 ? (
-            <p className="text-sm text-text-tertiary text-center py-8">No platform data yet</p>
+            <div className="flex-1 flex items-center justify-center">
+              <p className="text-sm text-text-tertiary text-center py-8">No platform data yet</p>
+            </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-4 overflow-y-auto pr-2 flex-1 min-h-0" style={{ maxHeight: '240px' }}>
               {platformBreakdown.map((p) => (
                 <div key={p.name}>
                   <div className="flex justify-between text-xs font-bold text-text-primary mb-2">

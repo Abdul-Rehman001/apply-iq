@@ -22,6 +22,8 @@ const UserSchema = new mongoose.Schema({
   atsDetails: { type: Object, default: null },
   atsResumeFingerprint: { type: String, default: null }, // Tracks which resume version was last scanned
   emailReportFrequency: { type: String, enum: ["daily", "weekly", "none"], default: "none" }, // User preference for automated reports
+  totalAiTokens: { type: Number, default: 0 }, // Track total Groq tokens burned
+  totalAiCalls: { type: Number, default: 0 }, // Track total AI actions performed
 }, { timestamps: true });
 
 // Prevent overwrite on hot reload

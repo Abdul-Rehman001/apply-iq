@@ -54,7 +54,7 @@ export function AICoachClient({ user, jobs }: AICoachClientProps) {
   ];
 
   return (
-    <div className="max-w-6xl mx-auto pb-20">
+    <div className="pb-20">
       {/* Premium Header */}
       <div className="mb-10">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-3">
