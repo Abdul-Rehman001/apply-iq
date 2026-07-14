@@ -184,6 +184,21 @@ ${job.jobDescription || "No description provided."}
       }
     );
 
+    // Track API Usage
+    const totalTokensUsed = 
+      (completion.usage?.total_tokens || 0) + 
+      (reAnalysisCompletion.usage?.total_tokens || 0);
+
+    await db!.collection("users").updateOne(
+      { _id: new mongoose.Types.ObjectId(userId) },
+      {
+        $inc: {
+          totalAiTokens: totalTokensUsed,
+          totalAiCalls: 2 // We made 2 LLM calls here (tailor + re-analyze)
+        }
+      }
+    );
+
     revalidatePath('/ai-coach');
     revalidatePath(`/jobs/${job._id}`);
 

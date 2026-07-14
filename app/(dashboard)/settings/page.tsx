@@ -30,7 +30,7 @@ export default async function SettingsPage() {
   const user = await getUser(session.user.id);
 
   return (
-    <div className="space-y-10 pb-20 max-w-6xl mx-auto">
+    <div className="space-y-10 pb-20">
       <div>
         <h1 className="text-2xl font-semibold text-text-primary tracking-tight">Account Settings</h1>
         <p className="text-text-secondary mt-1 font-medium">

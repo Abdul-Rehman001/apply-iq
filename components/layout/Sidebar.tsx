@@ -103,8 +103,8 @@ export function Sidebar({
               )}
             >
               <item.icon className={cn(
-                "h-4.5 w-4.5 shrink-0 transition-colors duration-200",
-                isActive ? "text-primary" : "text-text-tertiary group-hover:text-text-secondary"
+                "h-5 w-5 shrink-0 transition-all duration-200",
+                isActive ? "text-primary drop-shadow-md scale-110" : "text-primary opacity-60 group-hover:opacity-100 group-hover:scale-105"
               )} />
               {!collapsed && <span className="flex-1">{item.name}</span>}
               {!collapsed && item.badge}

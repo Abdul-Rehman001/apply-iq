@@ -5,6 +5,9 @@ import { Job } from "@/models/Job";
 import { User } from "@/models/User";
 import { IUser } from "@/types";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET() {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -22,12 +25,5 @@ export async function GET() {
 
   const hasResume = !!(user as IUser)?.resumeText && ((user as IUser)?.resumeText?.length ?? 0) > 50;
 
-  return NextResponse.json(
-    { unanalyzedCount, hasResume, followUpDueCount },
-    {
-      headers: {
-        "Cache-Control": "public, s-maxage=30, stale-while-revalidate=59",
-      },
-    }
-  );
+  return NextResponse.json({ unanalyzedCount, hasResume, followUpDueCount });
 }
